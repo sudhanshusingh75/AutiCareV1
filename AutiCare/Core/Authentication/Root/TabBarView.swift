@@ -8,12 +8,22 @@
 import SwiftUI
 
 struct TabBarView: View {
+    
     var body: some View {
         TabView{
             CommunityView()
             .tabItem {
                 Label("Home", systemImage: "house")
             }
+            LearningPageView()
+                .tabItem {
+                    Image(systemName: "book.fill")
+                    Text("Learning")
+                }
+            ProgressTabView()
+                            .tabItem {
+                                Label("Progress", systemImage: "chart.bar")
+                            }
             ProfileView()
             .tabItem {
                 Label("Profile", systemImage: "person.circle")
