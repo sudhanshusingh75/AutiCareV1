@@ -1,78 +1,132 @@
 //
-//  SwiftUIView.swift
+//  OtherUserProfileView1.swift
 //  Auticare
 //
-//  Created by Sudhanshu Singh Rajput on 10/02/25.
+//  Created by Sudhanshu Singh Rajput on 20/02/25.
 //
+
 import SwiftUI
-import FirebaseFirestore
 import SDWebImageSwiftUI
+import FirebaseAuth
 
-struct OtherUserProfileView: View {
+struct OtherUserProfileView1: View {
     let userId: String
-    @StateObject var viewModel = OtherUserProfileViewModel()  // Assuming you have a view model for fetching user data
-    @State private var selectedSegment: Int = 0
-    @State private var navigateToChat = false
-    
+    @StateObject var feedViewModel = FeedViewModel()
+    @StateObject var viewModel = OtherUserProfileViewModel()
+//    private let gridItems: [GridItem] = [
+//        .init(.flexible(), spacing: 1),
+//        .init(.flexible(), spacing: 1),
+//        .init(.flexible(), spacing: 1)
+//    ]
     var body: some View {
-        VStack {
-            if viewModel.isLoading {
-                // Show loading indicator
-                ProgressView("Loading...")
-                    .progressViewStyle(CircularProgressViewStyle())
-                    .padding()
-            } else if let user = viewModel.user {
-                // Show user profile when data is loaded
-                Image("background")
-                    .resizable()
-                    .frame(width: 500, height: 300)
-                if let url = URL(string: user.profileImageURL ?? "") {
-                    WebImage(url: url)
-                        .resizable()
-                        .frame(width: 150, height: 150)
-                        .clipShape(Circle())
-                        .overlay {
-                            Circle().stroke(Color.white, lineWidth: 3)
+        NavigationStack{
+            if let user = viewModel.user{
+                ScrollView{
+                    VStack(spacing: 10) {
+                        // Pics and stats
+                        HStack {
+                            if let imageURL = user.profileImageURL, let url = URL(string: imageURL) {
+                                WebImage(url: url)
+                                    .resizable()
+                                    .scaledToFill()
+                                    .frame(width: 80, height: 80)
+                                    .clipShape(Circle())
+                                    .padding(.all,5)
+                                    .overlay {
+                                        Circle().stroke(lineWidth: 2)
+                                    }
+                            } else {
+                                Text(user.initials)
+                                    .font(.largeTitle)
+                                    .frame(width: 150, height: 150)
+                                    .background(Color.gray.opacity(0.3))
+                                    .clipShape(Circle())
+                                    .padding(.all, 5)
+                                    .overlay(Circle().stroke(Color.blue, lineWidth: 4))
+                            }
+                            Spacer()
+                            HStack(spacing: 8) {
+                                UserStatView(value: user.postsCount, title: "Posts")
+                                NavigationLink(destination: FollowersView()) {
+                                    UserStatView(value: user.followers?.count ?? 0, title: "Followers")
+                                }
+                                UserStatView(value: 3, title: "Following")
+                            }
                         }
-                        .offset(x: -105, y: -80)
+                        .padding(.horizontal)
+                        
+                        // Name and Bio
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(user.fullName)
+                                .font(.footnote)
+                                .fontWeight(.semibold)
+                            
+                            Text(user.userName)
+                                .font(.footnote)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal)
+                        
+                        // Action button to edit profile
+                        if user.id != feedViewModel.userId{
+                            Button{
+                                feedViewModel.toggleFollow(userId: user.id)
+                            }
+                            label: {
+                                HStack {
+                                    // If user is not followed (i.e., connection is false or nil)
+                                    if feedViewModel.connections[user.id] == false || feedViewModel.connections[user.id] == nil {
+                                        Text("Follow")
+                                            .font(.subheadline)
+                                            .fontWeight(.semibold)
+                                            .foregroundColor(.white)
+                                            .frame(width: 360, height: 32)
+                                            .background(Color.blue)
+                                            .clipShape(RoundedRectangle(cornerRadius: 6))
+                                    } else {
+                                        // If user is followed (i.e., connection is true)
+                                        Text("Followed")
+                                            .font(.subheadline)
+                                            .fontWeight(.semibold)
+                                            .foregroundColor(.black)
+                                            .frame(width: 360, height: 32)
+                                            .overlay(RoundedRectangle(cornerRadius: 6).stroke(Color.gray, lineWidth: 1))
+                                    }
+                                }
+                            }
+                        }
+                        Divider()
+                    }
+//                    Group{
+//                        LazyVGrid(columns: gridItems, spacing: 1) {
+//                            ForEach(viewModel.othersPosts, id: \.id) { post in
+//                                if let imageURL = post.imageURL.first, let url = URL(string: imageURL) {
+//                                    NavigationLink(destination: FeedView(selectedPostId: post.id)){
+//                                        WebImage(url: url)
+//                                            .resizable()
+//                                            .scaledToFill()
+//                                            .frame(width:132,height: 132)
+//                                            .clipShape(RoundedRectangle(cornerRadius: 8))
+//                                            .padding(1)
+//                                    }
+//                                } else {
+//                                    Rectangle()
+//                                        .fill(Color.gray.opacity(0.2))
+//                                        .frame(height: 150)
+//                                        .cornerRadius(8)
+//                                }
+//                            }
+//                        }
+//                    }
                 }
-                VStack {
-                    Text(user.fullName)
-                        .font(.title3)
-                        .fontWeight(.bold)
-                }
-                .offset(x: -105, y: -130)
-                
-                Button {
-                    navigateToChat = true
-                    
-                } label: {
-                    Text("Message")
-                }
-                
-                Picker("Select View", selection: $selectedSegment) {
-                    Text("Posts").tag(0)
-                    Text("About").tag(1)
-                }
-                .pickerStyle(SegmentedPickerStyle())
-                .offset(y: -125)
-
-                if selectedSegment == 0 {
-                    // Show posts section
-                } else {
-                    // Show about section
-                }
-            } else {
-                // Handle case if user data is missing or nil
-                Text("User not found.")
             }
         }
         .onAppear {
-            viewModel.fetchUser(by: userId)  // Fetch user data when the view appears
-        }
-        .ignoresSafeArea(.all)
-        .navigationDestination(isPresented: $navigateToChat) {
-//                    ChatView(receiverId: userId)
+            viewModel.fetchUser(by: userId)
+            viewModel.fetchOthersPosts(userId: userId)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                    print("📌 Fetched Posts: \(viewModel.othersPosts)")
+            }
         }
     }
 }

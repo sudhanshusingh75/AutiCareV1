@@ -1,110 +1,107 @@
-//
-//  ProfileView.swift
-//  FireBaseAuthTutorail
-//
-//  Created by Sudhanshu Singh Rajput on 19/01/25.
-//
-//
-
 import SwiftUI
 import SDWebImageSwiftUI
 
-struct ProfileView: View {
+struct ProfileView1: View {
     @StateObject private var profileVM = ProfileViewModel()
     @EnvironmentObject var authVM: AuthViewModel
-    @State private var posts:[Posts] = []
+    @State private var posts: [Posts] = [] // This will hold the user's posts
+    private let gridItems: [GridItem] = [
+        .init(.flexible(), spacing: 1),
+        .init(.flexible(), spacing: 1),
+        .init(.flexible(), spacing: 1)
+    ]
+    
     var body: some View {
-        NavigationStack{
+        // Conditional rendering for user data
+        
+        NavigationStack {
             if let user = profileVM.user {
-                VStack(spacing: 16) {
-                    if let imageUrl = user.profileImageURL, let url = URL(string: imageUrl) {
-                        WebImage(url: url)
-                            .resizable()
-                            .scaledToFill()
-                            .frame(width: 150, height: 150)
-                            .clipShape(Circle())
-                            .padding(.all, 5)
-                            .overlay(Circle().stroke(Color.blue, lineWidth: 4))
-                    } else {
-                        Text(user.initials)
-                            .font(.largeTitle)
-                            .frame(width: 150, height: 150)
-                            .background(Color.gray.opacity(0.3))
-                            .clipShape(Circle())
-                            .padding(.all,5)
-                            .overlay(Circle().stroke(Color.blue, lineWidth: 4))
-                    }
-                    
-                    VStack(alignment: .center, spacing: 4) {
-                        Text(user.fullName)
-                            .font(.title2)
-                            .fontWeight(.bold)
-                        
-                        Text(user.userName)
-                            .font(.subheadline)
-                            .foregroundColor(.gray)
-                        
-                        if let bio = user.bio, !bio.isEmpty {
-                            Text(bio)
-                                .font(.body)
-                                .multilineTextAlignment(.center)
-                                .padding(.horizontal)
-                        }
-                        
-                        if let location = user.location, !location.isEmpty {
-                            Text(location)
-                                .font(.footnote)
-                                .foregroundColor(.gray)
-                        }
-                    }.padding()
-                    
-                    HStack(spacing: 50) {
-                        NavigationLink(destination: FollowersView()) {
-                            VStack {
-                                Text("\(user.followers?.count ?? 0)")
-                                    .font(.headline)
-                                Text("Followers")
-                                    .font(.caption)
-                                    .foregroundColor(.gray)
+                ScrollView {
+                    // Header Section
+                    VStack(spacing: 10) {
+                        // Pics and stats
+                        HStack {
+                            if let imageURL = user.profileImageURL, let url = URL(string: imageURL) {
+                                WebImage(url: url)
+                                    .resizable()
+                                    .scaledToFill()
+                                    .frame(width: 80, height: 80)
+                                    .clipShape(Circle())
+                            } else {
+                                Text(user.initials)
+                                    .font(.largeTitle)
+                                    .frame(width: 150, height: 150)
+                                    .background(Color.gray.opacity(0.3))
+                                    .clipShape(Circle())
+                                    .padding(.all, 5)
+                                    .overlay(Circle().stroke(Color.blue, lineWidth: 4))
+                            }
+                            Spacer()
+                            HStack(spacing: 8) {
+                                UserStatView(value: user.postsCount, title: "Posts")
+                                NavigationLink(destination: FollowersView()) {
+                                    UserStatView(value: user.followers?.count ?? 0, title: "Followers")
+                                }
+                                UserStatView(value: 3, title: "Following")
                             }
                         }
-                        VStack {
-                            Text("\(user.followings?.count ?? 0)")
-                                .font(.headline)
-                            Text("Following")
-                                .font(.caption)
-                                .foregroundColor(.gray)
-                        }
+                        .padding(.horizontal)
                         
-                        VStack {
-                            Text("\(user.postsCount)")
-                                .font(.headline)
-                            Text("Posts")
-                                .font(.caption)
-                                .foregroundColor(.gray)
+                        // Name and Bio
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(user.fullName)
+                                .font(.footnote)
+                                .fontWeight(.semibold)
+                            
+                            Text(user.userName)
+                                .font(.footnote)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal)
+                        
+                        // Action button to edit profile
+                        NavigationLink {
+                            if let user = authVM.currentUser {
+                                EditProfileView(user: user)
+                                    .navigationBarBackButtonHidden(true)
+                            }
+                        } label: {
+                            Text("Edit Profile")
+                                .font(.subheadline)
+                                .fontWeight(.semibold)
+                                .foregroundColor(.black)
+                                .frame(width: 360, height: 32)
+                                .overlay(RoundedRectangle(cornerRadius: 6).stroke(Color.gray, lineWidth: 1))
+                        }
+                        Divider()
+                    }
+                    
+                    // Post Grid View
+                    LazyVGrid(columns: gridItems, spacing: 1) {
+                        ForEach(profileVM.myPosts, id: \.id) { post in
+                            if let imageURL = post.imageURL.first, let url = URL(string: imageURL) {
+                                NavigationLink(destination: FeedView(selectedPostId: post.id)){
+                                    WebImage(url: url)
+                                        .resizable()
+                                        .scaledToFill()
+                                        .frame(width:132,height: 132)
+                                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                                        .padding(1)
+                                }
+                            } else {
+                                Rectangle()
+                                    .fill(Color.gray.opacity(0.2))
+                                    .frame(height: 150)
+                                    .cornerRadius(8)
+                            }
                         }
                     }
                     
-                    HStack{
-                        Button {
-                            
-                        } label: {
-                            Text("Follow")
-                        }
-                        
-                        Button {
-                            
-                        } label: {
-                            Text("Message")
-                        }
-
-                    }
                     
-                    Spacer()
                 }
                 .navigationTitle("Profile")
                 .navigationBarTitleDisplayMode(.inline)
-                .toolbar{
+                .toolbar {
                     ToolbarItem{
                             NavigationLink {
                                 AddNewPostView(posts: $posts)
@@ -116,29 +113,37 @@ struct ProfileView: View {
                         NavigationLink {
                             SettingsView()
                         } label: {
-                            Image(systemName: "gearshape")
+                            Image(systemName: "line.3.horizontal")
                         }
 
                     }
                 }
-                .padding()
-            } else {
+            }
+            else {
+                // Loading View if user data is not available
                 ProgressView("Loading...")
             }
         }
-        // Fetch user details when the view appears
         .onAppear {
+            // Fetch user data and posts when the view appears
             if let userId = authVM.currentUser?.id {
                 profileVM.fetchUser(userId: userId)
+                profileVM.fetchMyPosts(userId: userId)
             }
+            
         }
+        
     }
     
-    // Preview
-    struct ProfileView_Previews: PreviewProvider {
-        static var previews: some View {
-            ProfileView()
-                .environmentObject(AuthViewModel())
-        }
+}
+
+
+
+// Preview
+struct ProfileView1_Previews: PreviewProvider {
+    static var previews: some View {
+        ProfileView1()
+            .environmentObject(AuthViewModel())
     }
 }
+
