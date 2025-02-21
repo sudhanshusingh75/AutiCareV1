@@ -13,6 +13,7 @@ class OtherUserProfileViewModel: ObservableObject {
     @Published var user: User? = nil
     @Published var isLoading: Bool = false
     private var db = Firestore.firestore()
+    @Published var othersPosts : [Posts] = []
     
     // Fetch user data from Firestore
     func fetchUser(by userId: String) {
@@ -35,6 +36,20 @@ class OtherUserProfileViewModel: ObservableObject {
             }
             self.isLoading = false
         }
+    }
+    func fetchOthersPosts(userId: String) {
+        db.collection("Posts")
+            .whereField("userId", isEqualTo: userId)
+            .order(by: "createdAt", descending: true)
+            .getDocuments { snapshot, error in
+                if let error = error {
+                    print("❌ Error fetching posts: \(error.localizedDescription)")
+                } else {
+                    self.othersPosts = snapshot?.documents.compactMap { document in
+                        try? document.data(as: Posts.self)
+                    } ?? []
+                }
+            }
     }
 }
 

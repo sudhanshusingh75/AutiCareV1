@@ -261,7 +261,7 @@ class FeedViewModel: ObservableObject,Identifiable {
                 return nil
             } completion: { _, error in
                 DispatchQueue.main.async {
-                    self.connections[userId]?.toggle()
+                    self.connections[userId] = !(self.connections[userId] ?? false)
                     // Update UI for this specific user
                 }
             }
@@ -271,6 +271,24 @@ class FeedViewModel: ObservableObject,Identifiable {
     func removeFromFeed(postId: String) {
         DispatchQueue.main.async {
             self.posts.removeAll { $0.id == postId }
+        }
+    }
+    
+    func reportPost(postId: String/*, reason: String*/) async throws {
+        guard let userId = Auth.auth().currentUser?.uid else { return }
+        let reportId = UUID().uuidString
+        let report = Report(
+            id: reportId, postId: postId,
+            reportedBy: userId, reason: "",
+            timestamp: Date().timeIntervalSince1970
+        )
+
+        do {
+            let _ = try await db.collection("reports").addDocument(from: report)
+            print("Post reported successfully!")
+        } catch {
+            print("Error reporting post: \(error.localizedDescription)")
+            throw error
         }
     }
 

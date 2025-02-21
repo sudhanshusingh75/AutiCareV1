@@ -173,7 +173,7 @@ struct FeedCell: View {
                         .presentationDragIndicator(.visible)
                 }
                     Button {
-                        
+                        sharePost()
                     } label: {
                         Image(systemName: "arrow.uturn.right")
                             .resizable()
@@ -187,6 +187,25 @@ struct FeedCell: View {
             Spacer()
         }
         
+    }
+    
+    
+    private func sharePost() {
+        let textToShare = post.content
+        let imageUrl = post.imageURL
+        
+        var itemsToShare: [Any] = [textToShare]
+        
+        if let imageUrl = imageUrl.first, let url = URL(string: imageUrl) {
+            itemsToShare.append(url)
+        }
+        
+        let activityVC = UIActivityViewController(activityItems: itemsToShare, applicationActivities: nil)
+        
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+           let rootViewController = windowScene.windows.first?.rootViewController {
+            rootViewController.present(activityVC, animated: true, completion: nil)
+        }
     }
 }
 

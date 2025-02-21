@@ -37,11 +37,11 @@ struct CommunityView: View {
                         Image(systemName: "magnifyingglass")
                     }
                 }
-                ToolbarItem(placement: .topBarTrailing) {
-                    NavigationLink(destination:ChatView()) {
-                        Image(systemName: "message")
-                    }
-                }
+//                ToolbarItem(placement: .topBarTrailing) {
+//                    NavigationLink(destination:ChatView()) {
+//                        Image(systemName: "message")
+//                    }
+//                }
             }
         }
     }

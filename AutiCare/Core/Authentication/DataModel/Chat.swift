@@ -14,6 +14,7 @@ struct Chat:Codable,Identifiable{
     var lastMessageTime:TimeInterval
     var lastSenderId:String
     var isGroupChat:Bool
+    let participants:[String]
 }
 
 struct Message:Identifiable,Codable{

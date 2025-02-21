@@ -12,7 +12,9 @@ struct AddNewPostView: View {
     @State private var selectedTag = ""
     let columns = [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())]
     @Binding var posts: [Posts]
+    var onPostAdded: (() -> Void)?
     @StateObject private var viewModel = AddNewPostViewModel()
+    @StateObject private var profileVM = ProfileViewModel()
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject var authViewModel: AuthViewModel
     
@@ -107,6 +109,7 @@ struct AddNewPostView: View {
                     Button {
                         Task {
                             await viewModel.addPost(currentUser: authViewModel.currentUser)
+                            onPostAdded?()
                             dismiss()
                         }
                     } label: {

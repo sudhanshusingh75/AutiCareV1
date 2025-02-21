@@ -12,6 +12,7 @@ class SearchViewModel:ObservableObject{
     @Published var user : [User] = []
     @Published var searchText : String = ""
     @Published var followers:[User] = []
+    @Published var followings:[User] = []
     let db = Firestore.firestore()
     
     func fetchAllUsers() async{
@@ -83,5 +84,42 @@ class SearchViewModel:ObservableObject{
                 print("Error fetching followers: \(error.localizedDescription)")
             }
         }
+    
+    func fetchFollowings(for userId: String) async {
+            let db = Firestore.firestore()
+            do {
+                // Get the current user's document
+                let userDoc = try await db.collection("Users").document(userId).getDocument()
+                
+                if let data = userDoc.data(),
+                   let followingsIds = data["followings"] as? [String] {
+                    // Fetch users based on follower ids
+                    var fetchedFollowings: [User] = []
+                    for followingsId in followingsIds {
+                        let userDoc = try await db.collection("Users").document(followingsId).getDocument()
+                        if let userData = userDoc.data() {
+                            let user = User(id: userDoc.documentID,
+                                            fullName: userData["fullName"] as? String ?? "Unknown",
+                                            email: userData["email"] as? String ?? "",
+                                            userName: userData["userName"] as? String ?? "",
+                                            profileImageURL: userData["profileImageURL"] as? String,
+                                            dob: (userData["dob"] as? Timestamp)?.dateValue() ?? Date(),
+                                            gender: userData["gender"] as? String ?? "",
+                                            followers: userData["followers"] as? [String] ?? [],
+                                            followings: userData["followings"] as? [String] ?? [],
+                                            postsCount: userData["postsCount"] as? Int ?? 0,
+                                            bio: userData["bio"] as? String)
+                            fetchedFollowings.append(user)
+                        }
+                    }
+                    DispatchQueue.main.async{
+                        self.followings = fetchedFollowings
+                    }
+                }
+            } catch {
+                print("Error fetching followers: \(error.localizedDescription)")
+            }
+        }
+    
     
 }

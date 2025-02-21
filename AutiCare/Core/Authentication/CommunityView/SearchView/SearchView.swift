@@ -18,6 +18,7 @@ struct SearchView: View {
             user.id != currentUserId && (user.fullName.localizedCaseInsensitiveContains(inputText)||user.userName.localizedCaseInsensitiveContains(inputText))
         }
     }
+    
     var body: some View {
         NavigationStack{
             List(filteredUsers){user in

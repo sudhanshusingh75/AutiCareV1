@@ -10,6 +10,7 @@ import SwiftUI
 struct MenuView: View {
     @ObservedObject var viewModel: FeedViewModel
     let post: Posts
+    @Environment(\.dismiss) var dismiss
     
     var body: some View {
         VStack(alignment:.leading,spacing: 12) {
@@ -21,7 +22,7 @@ struct MenuView: View {
                 } label: {
                     HStack {
                         Image(systemName: viewModel.connections[post.userId] ?? false ? "person.fill.xmark" : "person.fill.checkmark")
-                        Text(viewModel.connections[post.userId] ?? false ? "Remove Connection" : "Connect")
+                        Text(viewModel.connections[post.userId] ?? false ? "Unfollow" : "Follow")
                     }
                     .frame(maxWidth: .infinity)
                     .padding()
@@ -57,6 +58,11 @@ struct MenuView: View {
                 
                 Button {
                     // Report functionality here
+                    Task{
+                        try await viewModel.reportPost(postId: post.id)
+                        dismiss()
+                    }
+                    
                 } label: {
                     HStack {
                         Image(systemName: "exclamationmark.triangle.fill")
@@ -70,20 +76,39 @@ struct MenuView: View {
                 }
             }
             Divider()
-            Button {
-                
-            } label: {
-                Label("Share Post", systemImage: "square.and.arrow.up")
-            }
-            .frame(maxWidth: .infinity)
-            .padding()
-            .background(Color.green.opacity(0.2))
-            .foregroundStyle(Color.green)
-            .clipShape(RoundedRectangle(cornerRadius: 10))
+//            Button {
+//                sharePost()
+//            } label: {
+//                Label("Share Post", systemImage: "square.and.arrow.up")
+//            }
+//            .frame(maxWidth: .infinity)
+//            .padding()
+//            .background(Color.green.opacity(0.2))
+//            .foregroundStyle(Color.green)
+//            .clipShape(RoundedRectangle(cornerRadius: 10))
 
             Spacer()
         }.padding()
     }
+    
+    
+//    private func sharePost() {
+//        let textToShare = post.content
+//        let imageUrl = post.imageURL
+//        
+//        var itemsToShare: [Any] = [textToShare]
+//        
+//        if let imageUrl = imageUrl.first, let url = URL(string: imageUrl) {
+//            itemsToShare.append(url)
+//        }
+//        
+//        let activityVC = UIActivityViewController(activityItems: itemsToShare, applicationActivities: nil)
+//        
+//        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+//           let rootViewController = windowScene.windows.first?.rootViewController {
+//            rootViewController.present(activityVC, animated: true, completion: nil)
+//        }
+//    }
 }
 
 

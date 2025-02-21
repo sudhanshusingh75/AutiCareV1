@@ -10,6 +10,7 @@
 		2532395E2D4CDDEB008DBFDC /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 2532395D2D4CDDEB008DBFDC /* GoogleService-Info.plist */; };
 		253239612D4CE120008DBFDC /* Storage in Frameworks */ = {isa = PBXBuildFile; productRef = 253239602D4CE120008DBFDC /* Storage */; };
 		253239632D4CE231008DBFDC /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = 253239622D4CE231008DBFDC /* Supabase */; };
+		259CCFFF2D67CDDF00C29F37 /* Report.swift in Sources */ = {isa = PBXBuildFile; fileRef = 259CCFFE2D67CDDF00C29F37 /* Report.swift */; };
 		25B4D06D2D3D3BB100E4E298 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 25B4D06C2D3D3BB100E4E298 /* FirebaseAuth */; };
 		25B4D06F2D3D3BB100E4E298 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 25B4D06E2D3D3BB100E4E298 /* FirebaseFirestore */; };
 		25B4D0712D3D3BB100E4E298 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 25B4D0702D3D3BB100E4E298 /* FirebaseStorage */; };
@@ -18,6 +19,7 @@
 
 /* Begin PBXFileReference section */
 		2532395D2D4CDDEB008DBFDC /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		259CCFFE2D67CDDF00C29F37 /* Report.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Report.swift; sourceTree = "<group>"; };
 		25B4D0462D3CFF2D00E4E298 /* AutiCare.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AutiCare.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -62,6 +64,7 @@
 		25B4D03D2D3CFF2D00E4E298 = {
 			isa = PBXGroup;
 			children = (
+				259CCFFE2D67CDDF00C29F37 /* Report.swift */,
 				2532395D2D4CDDEB008DBFDC /* GoogleService-Info.plist */,
 				25B4D0482D3CFF2D00E4E298 /* AutiCare */,
 				25B4D0472D3CFF2D00E4E298 /* Products */,
@@ -162,6 +165,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				259CCFFF2D67CDDF00C29F37 /* Report.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

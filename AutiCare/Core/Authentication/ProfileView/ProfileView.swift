@@ -1,7 +1,7 @@
 import SwiftUI
 import SDWebImageSwiftUI
 
-struct ProfileView1: View {
+struct ProfileView: View {
     @StateObject private var profileVM = ProfileViewModel()
     @EnvironmentObject var authVM: AuthViewModel
     @State private var posts: [Posts] = [] // This will hold the user's posts
@@ -13,7 +13,6 @@ struct ProfileView1: View {
     
     var body: some View {
         // Conditional rendering for user data
-        
         NavigationStack {
             if let user = profileVM.user {
                 ScrollView {
@@ -27,6 +26,10 @@ struct ProfileView1: View {
                                     .scaledToFill()
                                     .frame(width: 80, height: 80)
                                     .clipShape(Circle())
+                                    .padding(.all,5)
+                                    .overlay {
+                                        Circle().stroke(lineWidth: 2)
+                                    }
                             } else {
                                 Text(user.initials)
                                     .font(.largeTitle)
@@ -42,7 +45,9 @@ struct ProfileView1: View {
                                 NavigationLink(destination: FollowersView()) {
                                     UserStatView(value: user.followers?.count ?? 0, title: "Followers")
                                 }
-                                UserStatView(value: 3, title: "Following")
+                                NavigationLink(destination: FollowingsView()) {
+                                    UserStatView(value: user.followings?.count ?? 0, title: "Following")
+                                }
                             }
                         }
                         .padding(.horizontal)
@@ -75,7 +80,6 @@ struct ProfileView1: View {
                         }
                         Divider()
                     }
-                    
                     // Post Grid View
                     LazyVGrid(columns: gridItems, spacing: 1) {
                         ForEach(profileVM.myPosts, id: \.id) { post in
@@ -105,6 +109,11 @@ struct ProfileView1: View {
                     ToolbarItem{
                             NavigationLink {
                                 AddNewPostView(posts: $posts)
+                                {
+                                    if let userId = authVM.currentUser?.id{
+                                        profileVM.fetchMyPosts(userId: userId)
+                                    }
+                                }
                             } label: {
                                 Image(systemName: "plus.app")
                             }
@@ -132,18 +141,13 @@ struct ProfileView1: View {
             }
             
         }
+     }
         
     }
     
-}
-
-
 
 // Preview
-struct ProfileView1_Previews: PreviewProvider {
-    static var previews: some View {
-        ProfileView1()
-            .environmentObject(AuthViewModel())
-    }
+#Preview {
+    ProfileView()
 }
 

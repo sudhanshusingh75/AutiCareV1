@@ -12,8 +12,24 @@ import FirebaseAuth
 class ProfileViewModel:ObservableObject{
     @Published var user:User?
     private var db = Firestore.firestore()
+    @Published var myPosts: [Posts] = []
     private var listener: ListenerRegistration?
     let supabase = SupabaseClient(supabaseURL: URL(string: "https://zaaxtksuazyvxntlwmrn.supabase.co")!, supabaseKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InphYXh0a3N1YXp5dnhudGx3bXJuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzgzMTk2ODIsImV4cCI6MjA1Mzg5NTY4Mn0.5IBPLi4bdv0e04rWbaqqB9U3YDh23py4ieTijArJA8M")
+    
+
+    
+    func fetchMyPosts(userId:String){
+        db.collection("Posts").whereField("userId", isEqualTo: userId).order(by: "createdAt",descending: true).getDocuments { snapshot, error in
+            if let error = error {
+                print("Error fetching posts: \(error.localizedDescription)")
+            } else {
+                // Map the documents to Post model
+                self.myPosts = snapshot?.documents.compactMap { document in
+                    try? document.data(as: Posts.self)
+                } ?? []
+            }
+        }
+    }
     
     func fetchUser(userId:String) {
         // ✅ Remove previous listener to avoid duplicate listeners
