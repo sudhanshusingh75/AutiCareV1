@@ -33,11 +33,13 @@ struct ProfileView: View {
                             } else {
                                 Text(user.initials)
                                     .font(.largeTitle)
-                                    .frame(width: 150, height: 150)
+                                    .frame(width: 80, height: 80)
                                     .background(Color.gray.opacity(0.3))
                                     .clipShape(Circle())
                                     .padding(.all, 5)
-                                    .overlay(Circle().stroke(Color.blue, lineWidth: 4))
+                                    .overlay {
+                                        Circle().stroke(lineWidth: 2)
+                                    }
                             }
                             Spacer()
                             HStack(spacing: 8) {
@@ -88,7 +90,7 @@ struct ProfileView: View {
                                     WebImage(url: url)
                                         .resizable()
                                         .scaledToFill()
-                                        .frame(width:132,height: 132)
+                                        .frame(width:125,height: 120)
                                         .clipShape(RoundedRectangle(cornerRadius: 8))
                                         .padding(1)
                                 }

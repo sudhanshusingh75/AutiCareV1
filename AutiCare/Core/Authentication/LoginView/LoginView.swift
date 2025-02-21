@@ -39,7 +39,7 @@ struct LoginView: View {
 
                     // password
                     InputView(text: $password, title: "Password", placeholder: "Enter Your Password", isSecureField: true, errorMessage: passwordErrorMessage)
-                        .onChange(of: password) {validatePassword()}
+//                        .onChange(of: password) {validatePassword()}
                 }
                 .padding(.horizontal)
                 .padding(.top, 12)
@@ -90,19 +90,20 @@ struct LoginView: View {
         }
     }
 
-    private func validatePassword() {
-        if !isValidPassword(password) {
-            passwordErrorMessage = "Password must be at least 6 characters long and contain 1 uppercase, 1 lowercase, and 1 number."
-        } else {
-            passwordErrorMessage = ""
-        }
-    }
+//    private func validatePassword() {
+//        if !isValidPassword(password) {
+//            passwordErrorMessage = "Password must be at least 6 characters long and contain 1 uppercase, 1 lowercase, and 1 number."
+//        } else {
+//            passwordErrorMessage = ""
+//        }
+//    }
 }
 
 extension LoginView: AuthenticationProtocol {
     var formIsValid: Bool {
-        return isValidEmail(email) &&
-               isValidPassword(password)
+        return isValidEmail(email)
+//        &&
+//               isValidPassword(password)
     }
 
     private func isValidEmail(_ email: String) -> Bool {
@@ -112,13 +113,13 @@ extension LoginView: AuthenticationProtocol {
         return !email.isEmpty && emailPredicate.evaluate(with: email)
     }
 
-    private func isValidPassword(_ password: String) -> Bool {
-        // Password should be at least 6 characters long
-        // And must contain at least 1 uppercase letter, 1 lowercase letter, and 1 number
-        let passwordRegEx = "(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9]).{6,}"
-        let passwordPredicate = NSPredicate(format:"SELF MATCHES %@", passwordRegEx)
-        return !password.isEmpty && passwordPredicate.evaluate(with: password)
-    }
+//    private func isValidPassword(_ password: String) -> Bool {
+//        // Password should be at least 6 characters long
+//        // And must contain at least 1 uppercase letter, 1 lowercase letter, and 1 number
+//        let passwordRegEx = "(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9]).{6,}"
+//        let passwordPredicate = NSPredicate(format:"SELF MATCHES %@", passwordRegEx)
+//        return !password.isEmpty && passwordPredicate.evaluate(with: password)
+//    }
 }
 
 #Preview {

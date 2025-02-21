@@ -25,13 +25,20 @@ struct FeedCell: View {
                //Header Section of the Feed
                 if post.userId == currentUser?.uid{
                     NavigationLink(destination: ProfileView()){
-                        if let url = URL(string: post.profileImageURL ?? ""){
+                        if let urlString = post.profileImageURL, let url = URL(string: urlString), !urlString.isEmpty {
                             WebImage(url: url)
                                 .resizable()
-                                .frame(width: 50,height: 50)
+                                .frame(width: 50, height: 50)
                                 .clipShape(Circle())
-                            
+                        } else {
+                            Text(post.initials)
+                                .font(.title3)
+                                .frame(width: 50, height: 50)
+                                .foregroundColor(.black)
+                                .background(Color.gray.opacity(0.3))
+                                .clipShape(Circle())
                         }
+
                         VStack(alignment:.leading){
                             Text(post.fullName)
                                 .font(.callout)

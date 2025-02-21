@@ -15,7 +15,7 @@ struct ExploreView: View {
         VStack {
             ExploreFilter(selectedFilters: $selectedFilters) // ✅ Multi-selection support
             ScrollView {
-                LazyVGrid(columns: gridItems, spacing: 2) {
+                LazyVGrid(columns: gridItems, spacing: 1) {
                     ForEach(viewModel.explorePosts, id: \.id) { post in
                         if let firstImageUrl = post.imageURL.first,
                            let url = URL(string: firstImageUrl) {
@@ -24,7 +24,7 @@ struct ExploreView: View {
                                     .resizable()
                                     .indicator(.activity)
                                     .scaledToFill()
-                                    .frame(width: 132, height: 120)
+                                    .frame(width: 125, height: 120)
                                     .clipShape(RoundedRectangle(cornerRadius: 8))
                             }
                         }

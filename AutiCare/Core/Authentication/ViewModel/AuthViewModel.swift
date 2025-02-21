@@ -55,7 +55,7 @@ class AuthViewModel: ObservableObject {
                 throw NSError(domain: "AuthError", code: -1, userInfo: [NSLocalizedDescriptionKey: "User session not found."])
             }
             
-            var profileImageURL: String? = nil
+            var profileImageURL: String? = ""
             
             // Upload profile image if available
             if let profileImage {

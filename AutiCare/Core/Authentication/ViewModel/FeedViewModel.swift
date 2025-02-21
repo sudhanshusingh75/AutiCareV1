@@ -279,8 +279,8 @@ class FeedViewModel: ObservableObject,Identifiable {
         let reportId = UUID().uuidString
         let report = Report(
             id: reportId, postId: postId,
-            reportedBy: userId, reason: "",
-            timestamp: Date().timeIntervalSince1970
+            reportedBy: userId, reson: "",
+            timeStamp: Date().timeIntervalSince1970
         )
 
         do {
