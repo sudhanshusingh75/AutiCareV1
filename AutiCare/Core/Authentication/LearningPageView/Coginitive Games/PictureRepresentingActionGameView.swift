@@ -51,9 +51,7 @@ struct PictureRepresentingActionGameView: View {
                 .foregroundColor(.white)
                 .padding()
             
-            ProgressView(value: Double(currentQuestionIndex), total: Double(questions.count))
-                .progressViewStyle(LinearProgressViewStyle(tint: .yellow))
-                .padding()
+            
             
             let question = questions[currentQuestionIndex]
             

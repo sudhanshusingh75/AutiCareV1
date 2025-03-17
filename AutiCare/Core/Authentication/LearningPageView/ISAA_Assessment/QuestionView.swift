@@ -120,7 +120,7 @@ struct QuestionView: View {
                                     .background(Color.green)
                                     .foregroundColor(.white)
                                     .cornerRadius(10)
-                            }
+                            }.navigationBarBackButtonHidden(true)
                         }
                     }
                     .padding()

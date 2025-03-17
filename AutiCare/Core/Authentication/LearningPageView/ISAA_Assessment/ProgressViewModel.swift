@@ -11,6 +11,10 @@ import FirebaseFirestore
 import FirebaseAuth
 
 class ProgressViewModel: ObservableObject {
+    @Published var categories: [String] = [
+        "Social Interaction", "Emotional Responsiveness", "Speech & Communication",
+        "Behavior Patterns", "Sensory Aspects", "Cognitive Components"
+    ]
     @Published var latestResult: AssessmentResult?
     @Published var allResults: [AssessmentResult] = []
 
@@ -19,42 +23,49 @@ class ProgressViewModel: ObservableObject {
     }
 
     func fetchAssessmentResults() {
-        guard let userId = Auth.auth().currentUser?.uid else {
-            print("❌ User not authenticated")
-            return
-        }
-
         let db = Firestore.firestore()
+        guard let userId = Auth.auth().currentUser?.uid else { return }
+
         db.collection("Users").document(userId).collection("assessmentResults")
-            .order(by: "date", descending: false) 
+            .order(by: "date", descending: true) // Fetch most recent first
             .getDocuments { snapshot, error in
                 if let error = error {
-                    print("❌ Error fetching results: \(error.localizedDescription)")
+                    print("Error fetching assessment results: \(error)")
                     return
                 }
 
-                guard let documents = snapshot?.documents else {
-                    print("⚠️ No results found")
-                    return
-                }
+                guard let documents = snapshot?.documents else { return }
 
-                DispatchQueue.main.async {
-                    self.allResults = documents.compactMap { doc -> AssessmentResult? in
-                        let data = doc.data()
-                        let totalScore = data["totalScore"] as? Int ?? 0
-                        let autismLevel = data["autismLevel"] as? String ?? "Unknown"
-                        let scoreBreakdown = data["scoreBreakdown"] as? [Int] ?? []
-                        let date = data["date"] as? Timestamp ?? Timestamp()
+                self.allResults = documents.compactMap { document in
+                    let data = document.data()
 
-                        return AssessmentResult(totalScore: totalScore, autismLevel: autismLevel, scoreBreakdown: scoreBreakdown, date: date)
-                    }
+                    let timestamp = data["date"] as? Timestamp
+                    let dateValue = timestamp?.dateValue() ?? Date()
 
-                    if let firstResult = self.allResults.last {
-                        self.latestResult = firstResult
-                    }
+                    let totalScore = data["totalAutismScore"] as? Int ?? 0
                     
-                    print("✅ Total results fetched: \(self.allResults.count)")
+                    let categoryDistributionsData = data["categoryDistributions"] as? [[String: Any]] ?? []
+                    let categoryDistributions = categoryDistributionsData.compactMap { item -> [Double]? in
+                        return item["distribution"] as? [Double]
+                    }
+
+                    return AssessmentResult(
+                        id: document.documentID,
+                        date: dateValue,
+                        totalScore: totalScore,
+                        severityLevels: categoryDistributions
+                    )
                 }
+
+                // Set latest result if available
+                self.latestResult = self.allResults.first
             }
     }
+}
+
+struct AssessmentResult: Identifiable {
+    let id: String
+    let date: Date
+    let totalScore: Int
+    let severityLevels: [[Double]] // Stacked bar chart data
 }

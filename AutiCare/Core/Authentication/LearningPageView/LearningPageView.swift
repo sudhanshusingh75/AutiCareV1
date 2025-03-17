@@ -4,66 +4,90 @@
 //
 //  Created by sourav_singh on 20/02/25.
 //
-
 import SwiftUI
 import AVKit
+import Firebase
+import FirebaseAuth
 
 struct LearningPageView: View {
+    @State private var hasTakenAssessment = false
+    @State private var isLoading = true
     
     var body: some View {
-            NavigationView {
-                ScrollView {
-                    VStack(spacing: 20) {
-                        
-                        
-                        VStack(alignment: .leading, spacing: 10) {
-                            Text("ISAA Assessment")
-                                .font(.title)
-                                .fontWeight(.bold)
-                                .foregroundColor(.white)
-                            
-                            Text("Take the ISAA assessment to get a certified evaluation for autism. This will help in understanding and improving developmental needs.")
-                                .font(.body)
-                                .foregroundColor(.white)
-                                .multilineTextAlignment(.leading)
-                            
-                            NavigationLink(destination: QuestionView()) {
-                                                            Text("Take Assessment")
-                                                                .font(.headline)
-                                                                .foregroundColor(.mint)
-                                                                .padding()
-                                                                .frame(maxWidth: .infinity)
-                                                                .background(Color.white)
-                                                                .cornerRadius(10)
-                                                        }
-                        }
-                        .padding()
-                        .background(Color.mint)
-                        .cornerRadius(20)
-                        .padding(.horizontal)
-           
-
+        NavigationView {
+            ScrollView {
+                VStack(spacing: 20) {
                     
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text("ISAA Assessment")
+                            .font(.title)
+                            .fontWeight(.bold)
+                            .foregroundColor(.white)
+                        
+                        Text("Take the ISAA assessment to get a certified evaluation for autism. This will help in understanding and improving developmental needs.")
+                            .font(.body)
+                            .foregroundColor(.white)
+                            .multilineTextAlignment(.leading)
+                        
+                        if isLoading {
+                            ProgressView() // Show loading indicator
+                                .padding()
+                        } else {
+                            NavigationLink(destination: QuestionView()) {
+                                Text(hasTakenAssessment ? "Retake Assessment" : "Take Assessment")
+                                    .font(.headline)
+                                    .foregroundColor(.mint)
+                                    .padding()
+                                    .frame(maxWidth: .infinity)
+                                    .background(Color.white)
+                                    .cornerRadius(10)
+                            }
+                        }
+                    }
+                    .padding()
+                    .background(Color.mint)
+                    .cornerRadius(20)
+                    .padding(.horizontal)
+
                     GameSectionView(title: "Cognitive Games",
                                     description: "These games help enhance problem-solving skills, attention span, and logical thinking in an interactive way.",
                                     games: cognitiveGames)
 
-                    
                     VideoSectionView(title: "Sessions",
                                      description: "Engaging video content to aid in learning and development, covering various essential skills.",
                                      videos: learningVideos)
 
-                    
                     WorksheetSectionView(title: "Worksheets",
                                          description: "Fun and interactive worksheets to help kids learn through activities.",
                                          worksheets: worksheets)
-                    }
-                    .padding(.bottom, 20)
-                    }
-                    .background(Color(.systemGray6).edgesIgnoringSafeArea(.all))
-                    .navigationTitle("Learning")
-                    }
+                }
+                .padding(.bottom, 20)
             }
+            .background(Color(.systemGray6).edgesIgnoringSafeArea(.all))
+            .navigationTitle("Learning")
+            .onAppear {
+                checkAssessmentStatus()
+            }
+        }
+    }
+    
+    /// Fetch assessment status from Firestore
+    private func checkAssessmentStatus() {
+        guard let userId = Auth.auth().currentUser?.uid else { return }
+        let db = Firestore.firestore()
+        
+        db.collection("Users").document(userId)
+            .collection("assessmentResults")
+            .getDocuments { snapshot, error in
+                if let error = error {
+                    print("Error fetching assessment results: \(error.localizedDescription)")
+                } else {
+                    // If there is any document in assessmentResult, user has taken the test
+                    hasTakenAssessment = !(snapshot?.documents.isEmpty ?? true)
+                }
+                isLoading = false
+            }
+    }
 }
 
 let cognitiveGames = [

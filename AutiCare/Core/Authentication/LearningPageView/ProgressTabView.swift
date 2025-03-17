@@ -4,119 +4,125 @@
 //
 //  Created by sourav_singh on 20/02/25.
 //
+
 import SwiftUI
-import Firebase
-import FirebaseFirestore
-import FirebaseAuth
 import Charts
 
 struct ProgressTabView: View {
-    @StateObject var viewModel = ProgressViewModel()
+    @StateObject var progressViewModel = ProgressViewModel()
 
     var body: some View {
         ScrollView {
-            VStack {
-                Text("Your Progress")
+            VStack(alignment: .leading, spacing: 30) { // ⬅ Increased spacing
+                
+                // 📌 HEADER
+                Text("Progress Overview")
                     .font(.largeTitle)
                     .bold()
-                    .padding()
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding(.top)
 
-                if let latestResult = viewModel.latestResult {
-                    Text("Recent Autism Score: \(latestResult.totalScore)")
-                        .font(.title2)
-                        .foregroundColor(.green)
-                        .padding()
+                // ✅ LINE GRAPH: Total Autism Score Over Time
+                if !progressViewModel.allResults.isEmpty {
+                    VStack {
+                        Text("Total Autism Score Over Time")
+                            .font(.headline)
+                            .padding(.bottom, 5)
 
-                    Text("Autism Level: \(latestResult.autismLevel)")
-                        .font(.title3)
-                        .fontWeight(.bold)
-                        .foregroundColor(.mint)
+                        Chart {
+                            ForEach(progressViewModel.allResults, id: \.id) { result in
+                                LineMark(
+                                    x: .value("Date", result.date),
+                                    y: .value("Score", result.totalScore)
+                                )
+                                .interpolationMethod(.catmullRom)
+                                .foregroundStyle(.blue)
+                                .symbol {
+                                    Circle()
+                                        .fill(Color.blue)
+                                        .frame(width: 8, height: 8)
+                                        .shadow(radius: 3)
+                                }
+                            }
+                        }
+                        .chartXAxis {
+                            AxisMarks(position: .bottom) { value in
+                                AxisValueLabel {
+                                    if let date = value.as(Date.self) {
+                                        Text(formattedDate(date))
+                                    }
+                                }
+                            }
+                        }
+                        .chartYAxis {
+                            AxisMarks(position: .leading) {
+                                AxisValueLabel()
+                                AxisGridLine()
+                            }
+                        }
                         .padding()
-
-                    PieChartView(data: latestResult.scoreBreakdown)
-                        .frame(height: 300)
-                        .padding()
-                } else {
-                    Text("No assessment results available")
-                        .foregroundColor(.gray)
-                        .padding()
+                        .frame(maxWidth: 350, minHeight: 300, alignment: .center) // ⬅ Limited width
+                        .background(RoundedRectangle(cornerRadius: 12).fill(Color(.systemBackground)).shadow(radius: 3))
+                    }
+                    .frame(maxWidth: .infinity, alignment: .center) // ⬅ Centering the graph
+                    .padding(.horizontal)
                 }
 
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Score Representation:")
-                        .font(.headline)
+                // ✅ STACKED BAR CHART FOR EACH ASSESSMENT
+                if !progressViewModel.allResults.isEmpty {
+                    VStack(alignment: .leading, spacing: 25) { // ⬅ More spacing
 
-                    HStack {
-                        ColorIndicator(color: .green, text: "1 - Minimal Symptoms")
-                        ColorIndicator(color: .blue, text: "2 - Mild Symptoms")
-                    }
-                    HStack {
-                        ColorIndicator(color: .yellow, text: "3 - Moderate Symptoms")
-                        ColorIndicator(color: .orange, text: "4 - Significant Symptoms")
-                    }
-                    HStack {
-                        ColorIndicator(color: .red, text: "5 - Severe Symptoms")
-                    }
-                }
-                .padding()
+                        ForEach(progressViewModel.allResults, id: \.id) { result in
+                            VStack(alignment: .leading, spacing: 15) { // ⬅ Prevent overlap
+                                // 🕒 Date & Time
+                                Text(formattedDateTime(result.date))
+                                    .font(.subheadline)
+                                    .foregroundColor(.gray)
+                                    .frame(maxWidth: .infinity, alignment: .center)
 
-//                Button("Retake Test") {
-//                    // Instead of full navigation reset, just navigate back
-//                    if let window = UIApplication.shared.windows.first {
-//                        window.rootViewController = UIHostingController(rootView: ProgressTabView())
-//                        window.makeKeyAndVisible()
-//                    }
-//                }
-//                .foregroundColor(.white)
-//                .padding()
-//                .frame(width: 200, height: 50)
-//                .background(Color.mint)
-//                .cornerRadius(10)
+                                // 📊 Stacked Bar Chart
+                                StackedBarChartView(
+                                    categoryDistributions: result.severityLevels,
+                                    categories: progressViewModel.categories
+                                )
+                                .frame(maxWidth: .infinity, minHeight: 250) // ⬅ More height to avoid compression
+                                .padding(.horizontal)
 
-                // Show Line Graph only if there are at least 5 assessments
-                if viewModel.allResults.count >= 5 {
-                    LineGraphView(results: viewModel.allResults)
-                        .padding()
+                                Divider().padding(.horizontal)
+                            }
+                            .padding()
+                            .background(RoundedRectangle(cornerRadius: 12).fill(Color(.systemBackground)).shadow(radius: 3))
+                        }
+                    }
+                    .padding(.horizontal)
                 } else {
-                    Text("Complete at least 5 assessments to view your progress graph.")
+                    Text("No assessment results found. Complete an assessment to track your progress.")
                         .foregroundColor(.gray)
                         .italic()
                         .padding()
+                        .multilineTextAlignment(.center)
+                        .frame(maxWidth: .infinity, alignment: .center)
                 }
-
-                Text("Your progress over time is reflected here.")
-                    .font(.headline)
-                    .padding()
             }
+            .padding(.bottom)
         }
         .onAppear {
-            viewModel.fetchAssessmentResults()
-        }
-    }
-}
-struct PieChart: View {
-    let data: [Int]
-
-    var body: some View {
-        Chart {
-            ForEach(1...5, id: \.self) { value in
-                let count = data.filter { $0 == value }.count
-                if count > 0 {
-                    SectorMark(angle: .value("Score", count), innerRadius: .ratio(0.5))
-                        .foregroundStyle(valueColor(value))
-                }
-            }
+            progressViewModel.fetchAssessmentResults()
         }
     }
 
-    func valueColor(_ value: Int) -> Color {
-        switch value {
-        case 1: return .green
-        case 2: return .blue
-        case 3: return .yellow
-        case 4: return .orange
-        default: return .red
-        }
+    // ✅ Format Date (Show "Mar 4")
+    func formattedDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMM d"
+        return formatter.string(from: date)
+    }
+
+    // ✅ Format Full Date & Time (Show "Mar 4, 2025 at 2:42 PM")
+    func formattedDateTime(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMM d, yyyy 'at' h:mm a"
+        return formatter.string(from: date)
     }
 }
 
