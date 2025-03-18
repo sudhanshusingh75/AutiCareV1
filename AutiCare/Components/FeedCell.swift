@@ -75,6 +75,7 @@ struct FeedCell: View {
                             showMenuView.toggle()
                         }label: {
                             Image(systemName: "ellipsis")
+                                .foregroundStyle(Color.init(red: 0, green: 0.387, blue: 0.5))
                             
                         }
                        
@@ -90,6 +91,7 @@ struct FeedCell: View {
                         viewModel.removeFromFeed(postId: post.id)
                     } label: {
                         Image(systemName: "xmark")
+                            .foregroundStyle(Color.init(red: 0, green: 0.387, blue: 0.5))
                     }
                 }
 
@@ -110,6 +112,7 @@ struct FeedCell: View {
                                 Text(showFullDescription ? " Less...":"More...")
                                     .font(.caption)
                                     .fontWeight(.semibold)
+                                    .foregroundStyle(Color.init(red: 0, green: 0.387, blue: 0.5))
                                     .padding(.vertical,4)
                                 
                             }
@@ -158,6 +161,7 @@ struct FeedCell: View {
                 } label: {
                     Image(systemName: viewModel.isLiked(post: post) ? "heart.fill":"heart")
                         .resizable()
+                        .foregroundStyle(Color.init(red: 0, green: 0.387, blue: 0.5))
                         .frame(width: 18,height: 18)
 
                 }
@@ -170,6 +174,7 @@ struct FeedCell: View {
                     } label: {
                         Image(systemName: "message")
                             .resizable()
+                            .foregroundStyle(Color.init(red: 0, green: 0.387, blue: 0.5))
                             .frame(width: 18,height:18)
                         
                     }
@@ -184,6 +189,7 @@ struct FeedCell: View {
                     } label: {
                         Image(systemName: "arrow.uturn.right")
                             .resizable()
+                            .foregroundStyle(Color.init(red: 0, green: 0.387, blue: 0.5))
                             .frame(width: 18,height: 18)
 
                     }
@@ -215,5 +221,6 @@ struct FeedCell: View {
         }
     }
 }
+
 
 

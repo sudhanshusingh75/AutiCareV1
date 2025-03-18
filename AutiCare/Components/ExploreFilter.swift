@@ -18,7 +18,7 @@ struct ExploreFilter: View {
                     Text(filter)
                         .padding(.horizontal, 16)
                         .padding(.vertical, 8)
-                        .background(selectedFilters.contains(filter) ? Color.blue : Color.gray.opacity(0.2))
+                        .background(selectedFilters.contains(filter) ? Color.init(red: 0, green: 0.387, blue: 0.5) : Color.gray.opacity(0.2))
                         .foregroundColor(selectedFilters.contains(filter) ? .white : .black)
                         .cornerRadius(20)
                         .onTapGesture {
@@ -39,4 +39,5 @@ struct ExploreFilter: View {
 #Preview {
     ExploreFilter(selectedFilters: .constant(["Sports"]))
 }
+
 

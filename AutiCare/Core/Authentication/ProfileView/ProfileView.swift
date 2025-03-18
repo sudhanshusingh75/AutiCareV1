@@ -28,7 +28,7 @@ struct ProfileView: View {
                                     .clipShape(Circle())
                                     .padding(.all,5)
                                     .overlay {
-                                        Circle().stroke(lineWidth: 2)
+                                        Circle().stroke(Color.init(red: 0, green: 0.387, blue: 0.5), lineWidth: 3)
                                     }
                             } else {
                                 Text(user.initials)
@@ -76,7 +76,8 @@ struct ProfileView: View {
                             Text("Edit Profile")
                                 .font(.subheadline)
                                 .fontWeight(.semibold)
-                                .foregroundColor(.black)
+//                                .foregroundColor(.black)
+                                .foregroundStyle(Color.init(red: 0, green: 0.387, blue: 0.5))
                                 .frame(width: 360, height: 32)
                                 .overlay(RoundedRectangle(cornerRadius: 6).stroke(Color.gray, lineWidth: 1))
                         }
@@ -94,7 +95,22 @@ struct ProfileView: View {
                                         .clipShape(RoundedRectangle(cornerRadius: 8))
                                         .padding(1)
                                 }
-                            } else {
+                            }
+                            else if !post.content.isEmpty{
+                                NavigationLink(destination: FeedView(selectedPostId:post.id)){
+                                    VStack{
+                                        Text(post.content)
+                                            .font(.caption)
+                                            .foregroundStyle(Color.black)
+                                            .padding(8)
+                                            .multilineTextAlignment(.center)
+                                            .frame(width: 125, height: 125)
+                                            .background(Color.gray.opacity(0.2))
+                                            .clipShape(RoundedRectangle(cornerRadius:8))
+                                    }.padding(1)
+                                }
+                            }
+                            else {
                                 Rectangle()
                                     .fill(Color.gray.opacity(0.2))
                                     .frame(height: 150)
@@ -109,24 +125,26 @@ struct ProfileView: View {
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem{
-                            NavigationLink {
-                                AddNewPostView(posts: $posts)
-                                {
-                                    if let userId = authVM.currentUser?.id{
-                                        profileVM.fetchMyPosts(userId: userId)
-                                    }
+                        NavigationLink {
+                            AddNewPostView(posts: $posts)
+                            {
+                                if let userId = authVM.currentUser?.id{
+                                    profileVM.fetchMyPosts(userId: userId)
                                 }
-                            } label: {
-                                Image(systemName: "plus.app")
                             }
+                        } label: {
+                            Image(systemName: "plus.app")
+                                .foregroundStyle(Color.init(red: 0, green: 0.387, blue: 0.5))
+                        }
                     }
                     ToolbarItem {
                         NavigationLink {
                             SettingsView()
                         } label: {
                             Image(systemName: "line.3.horizontal")
+                                .foregroundStyle(Color.init(red: 0, green: 0.387, blue: 0.5))
                         }
-
+                        
                     }
                 }
             }
@@ -143,13 +161,13 @@ struct ProfileView: View {
             }
             
         }
-     }
-        
     }
     
+}
 
 // Preview
 #Preview {
     ProfileView()
 }
+
 

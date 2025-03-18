@@ -19,7 +19,9 @@ struct SettingsView: View {
                     } label: {
                         HStack(spacing:20){
                             Image(systemName: "square.and.pencil")
+                                .foregroundStyle(Color.init(red: 0, green: 0.387, blue: 0.5))
                             Text("Edit Profile")
+                                .foregroundStyle(Color.init(red: 0, green: 0.387, blue: 0.5))
                             Spacer()
                         }
                     }

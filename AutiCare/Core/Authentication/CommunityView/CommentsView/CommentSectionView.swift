@@ -29,6 +29,7 @@ struct CommentSectionView: View {
                 } label: {
                     Image(systemName:"xmark")
                         .resizable()
+                        .foregroundStyle(Color.init(red: 0, green: 0.387, blue: 0.5))
                         .scaledToFill()
                         .frame(width: 18,height: 18)
                 }
@@ -78,6 +79,7 @@ struct CommentSectionView: View {
                             } label: {
                                 Image(systemName: newComment.isEmpty ? "paperplane":"paperplane.fill")
                                     .resizable()
+                                    .foregroundStyle(Color.init(red: 0, green: 0.387, blue: 0.5))
                                     .scaledToFill()
                                     .frame(width:18,height:18)
                                     .foregroundColor(.blue)

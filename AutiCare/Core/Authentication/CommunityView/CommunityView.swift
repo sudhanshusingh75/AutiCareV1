@@ -35,6 +35,7 @@ struct CommunityView: View {
                 ToolbarItem(placement: .topBarTrailing) {
                     NavigationLink(destination: SearchView()) {
                         Image(systemName: "magnifyingglass")
+                            .foregroundStyle(Color.init(red: 0, green: 0.387, blue: 0.5))
                     }
                 }
 //                ToolbarItem(placement: .topBarTrailing) {
