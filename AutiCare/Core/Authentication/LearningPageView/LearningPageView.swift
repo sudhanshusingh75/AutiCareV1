@@ -14,7 +14,7 @@ struct LearningPageView: View {
     @State private var isLoading = true
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ScrollView {
                 VStack(spacing: 20) {
                     
@@ -94,7 +94,7 @@ let cognitiveGames = [
     Game(title: "Memory Card", imageName: "memorycard", destination: AnyView(MemoryCardGameView())),
     Game(title: "who's Flying", imageName: "who'sFlying", destination: AnyView(PictureRepresentingActionGameView())),
     Game(title: "Maze", imageName: "MazeGame", destination: AnyView(MazeGameView())),
-    Game(title: "Match the Shape", imageName: "matchTheColor", destination: AnyView(ColorMatchingGameView())),
+    Game(title: "Match the Shape", imageName: "matchTheColor", destination: AnyView(ColorMatchingGame())),
     Game(title: "ISpy Game", imageName: "Ispy", destination: AnyView(ISpyGameView())),
     
 ]
@@ -170,7 +170,7 @@ struct GameSectionView: View {
             }
             .padding()
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color.purple)
+            .background(Color.mint)
             .cornerRadius(15)
             .padding(.horizontal)
             
@@ -218,7 +218,7 @@ struct VideoSectionView: View {
             }
             .padding()
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color.purple)
+            .background(Color.mint)
             .cornerRadius(15)
             .padding(.horizontal)
             
@@ -240,10 +240,10 @@ struct VideoSectionView: View {
                                     .foregroundColor(.black)
                                     .padding(.top, 5)
                             }
-                            .frame(width: 150, height: 180)
-                            .background(Color.yellow)
+                            .frame(width: 160, height: 180)
+                            .background(Color.white)
                             .cornerRadius(15)
-                            .shadow(radius: 5)
+                            
                         }
                     }
                 }
@@ -282,7 +282,7 @@ struct WorksheetSectionView: View {
             }
             .padding()
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color.purple)
+            .background(Color.mint)
             .cornerRadius(15)
             .padding(.horizontal)
             
@@ -304,10 +304,10 @@ struct WorksheetSectionView: View {
                                     .foregroundColor(.black)
                                     .padding(.top, 5)
                             }
-                            .frame(width: 160, height: 200)
-                            .background(Color.yellow)
+                            .frame(width: 160, height: 180)
+                            .background(Color.white)
                             .cornerRadius(15)
-                            .shadow(radius: 5)
+                           
                         }
                     }
                 }
@@ -338,10 +338,10 @@ struct GameCardView: View {
                             .foregroundColor(.black)
                             .padding(.top, 5)
                     }
-                    .frame(width: 150, height: 180)
-                    .background(Color.yellow.opacity(0.8))
+                    .frame(width: 160, height: 180)
+                    .background(Color.white)
                     .cornerRadius(15)
-                    .shadow(radius: 5)
+                    
                 }
             }
 }
@@ -350,22 +350,45 @@ struct VideoPlayerView: View {
     let fileName: String
     
     var body: some View {
-        VStack {
-            if let url = Bundle.main.url(forResource: fileName, withExtension: "mp4") {
-                VideoPlayer(player: AVPlayer(url: url))
-                    .frame(height: 300)
-                    .cornerRadius(10)
-                    .padding()
-            } else {
-                Text("Video not found")
-                    .foregroundColor(.red)
-                    .font(.headline)
-            }
-        }
-        .navigationTitle("Video Player")
+        VideoPlayerController(fileName: fileName)
+            .edgesIgnoringSafeArea(.all)
     }
 }
 
+// Wrapper to force landscape mode
+struct VideoPlayerController: UIViewControllerRepresentable {
+    let fileName: String
+    
+    func makeUIViewController(context: Context) -> AVPlayerViewController {
+        let controller = AVPlayerViewController()
+        
+        // Load the video from the bundle
+        if let url = Bundle.main.url(forResource: fileName, withExtension: "mp4") {
+            let player = AVPlayer(url: url)
+            controller.player = player
+            controller.showsPlaybackControls = true
+            
+            // Start playing the video automatically
+            player.play()
+        } else {
+            print("Video not found: \(fileName)")
+        }
+        
+        // Force landscape orientation
+        UIDevice.current.setValue(UIInterfaceOrientation.landscapeRight.rawValue, forKey: "orientation")
+        
+        return controller
+    }
+    
+    func updateUIViewController(_ uiViewController: AVPlayerViewController, context: Context) {
+        // No updates needed
+    }
+    
+    static func dismantleUIViewController(_ uiViewController: AVPlayerViewController, coordinator: ()) {
+        // Reset orientation to portrait when the view is dismissed
+        UIDevice.current.setValue(UIInterfaceOrientation.portrait.rawValue, forKey: "orientation")
+    }
+}
 #Preview {
     LearningPageView()
 }

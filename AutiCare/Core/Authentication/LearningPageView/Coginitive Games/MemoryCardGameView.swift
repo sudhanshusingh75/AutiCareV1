@@ -22,7 +22,7 @@ struct MemoryCardGameView: View {
     
     var body: some View {
         ZStack {
-            LinearGradient(gradient: Gradient(colors: [Color.purple]), startPoint: .top, endPoint: .bottom)
+            LinearGradient(gradient: Gradient(colors: [Color.white]), startPoint: .top, endPoint: .bottom)
                 .ignoresSafeArea()
             
             VStack {
@@ -33,7 +33,7 @@ struct MemoryCardGameView: View {
                     Text("Time Left: \(timeLeft)s")
                         .font(.title2)
                         .bold()
-                        .foregroundColor(.white)
+                        .foregroundColor(.black)
                         .padding()
                     
                     LazyVGrid(columns: columns, spacing: 10) {
@@ -51,8 +51,8 @@ struct MemoryCardGameView: View {
                             Text(matchedPairs == cards.count / 2 ? "🎉 YOU WON! 🎉" : "Game Over! Try Again")
                                 .font(.largeTitle)
                                 .bold()
-                                .foregroundColor(.white)
-                                .padding()
+                                .foregroundColor(.green)
+                                
                             
                             Button(action: startGame) {
                                 Text("Play Again")
@@ -67,7 +67,7 @@ struct MemoryCardGameView: View {
                     }
                 }
             }
-        }
+        }.toolbar(.hidden, for: .tabBar)
         .onAppear {
             setupGame()
         }
@@ -169,13 +169,13 @@ struct InstructionsView: View {
             Text("Memory Card Game")
                 .font(.largeTitle)
                 .bold()
-                .foregroundColor(.white)
+                .foregroundColor(.black)
             Text("Match all the pairs before time runs out!")
                 .font(.title3)
                 .foregroundColor(.yellow)
             Text("Click on a card to reveal its image. Find the matching image to form a pair.")
                 .padding()
-                .foregroundColor(.white)
+                .foregroundColor(.black)
             Button(action: startGame) {
                 Text("Start Game")
                     .font(.title)
@@ -186,8 +186,7 @@ struct InstructionsView: View {
             }
         }
         .padding()
-        .background(RoundedRectangle(cornerRadius: 20).fill(Color.black.opacity(0.8)))
-        .shadow(radius: 10)
+       
     }
 }
 

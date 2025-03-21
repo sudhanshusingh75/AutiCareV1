@@ -30,8 +30,7 @@ struct EnglishWordWorksheetView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                LinearGradient(gradient: Gradient(colors: [Color.blue, Color.purple]), startPoint: .top, endPoint: .bottom)
-                    .ignoresSafeArea()
+                
                 
                 VStack {
                     if showInstructions {
@@ -47,10 +46,6 @@ struct EnglishWordWorksheetView: View {
                     } else {
                         ScrollView {
                             VStack(spacing: 20) {
-                                Text("English Word Worksheet")
-                                    .font(.largeTitle)
-                                    .bold()
-                                    .foregroundColor(.yellow)
                                 
                                 ForEach(selectedAlphabets, id: \.self) { letter in
                                     QuestionsView(
@@ -76,18 +71,9 @@ struct EnglishWordWorksheetView: View {
                     }
                 }
                 .padding()
-                .navigationBarTitle("", displayMode: .inline)
-                .navigationBarItems(leading: Button(action: {
-                    presentationMode.wrappedValue.dismiss()
-                }) {
-                    HStack {
-                        Image(systemName: "chevron.left")
-                        Text("Back")
-                    }
-                    .font(.title3)
-                    .foregroundColor(.white)
-                })
-            }
+                .navigationBarBackButtonHidden(true)
+                
+            }.toolbar(.hidden, for: .tabBar)
         }
     }
     
@@ -126,7 +112,7 @@ struct InstructionsssView: View {
             Text("Welcome to the English Word Worksheet!")
                 .font(.largeTitle)
                 .bold()
-                .foregroundColor(.white)
+                .foregroundColor(.black)
             
             Text("You will be given 7 random letters. Each question will have only **one correct answer** among the choices.")
                 .font(.title3)
@@ -144,8 +130,7 @@ struct InstructionsssView: View {
             }
         }
         .padding()
-        .background(RoundedRectangle(cornerRadius: 20).fill(Color.black.opacity(0.8)))
-        .shadow(radius: 10)
+        
     }
 }
 
@@ -160,7 +145,7 @@ struct QuestionsView: View {
             Text("Which word starts with '\(letter)'?")
                 .font(.title2)
                 .bold()
-                .foregroundColor(.white)
+                .foregroundColor(.black)
             
             ForEach(distractors, id: \.self) { option in
                 Button(action: {
@@ -192,7 +177,7 @@ struct ScoresView: View {
             Text("Your Score")
                 .font(.largeTitle)
                 .bold()
-                .foregroundColor(.white)
+                .foregroundColor(.black)
             
             Text("\(score) / \(total)")
                 .font(.system(size: 50, weight: .bold))
@@ -209,8 +194,7 @@ struct ScoresView: View {
             .shadow(radius: 5)
         }
         .padding()
-        .background(RoundedRectangle(cornerRadius: 20).fill(Color.black.opacity(0.8)))
-        .shadow(radius: 10)
+        
     }
 }
 

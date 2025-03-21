@@ -59,8 +59,8 @@ struct VegetableQuizView: View {
                     .padding()
                     .background(Color.yellow.opacity(0.1).edgesIgnoringSafeArea(.all))
                 } else {
-                    Text("Guess the Vegetable!")
-                        .font(.largeTitle)
+                    Text("Guess the Vegetable name!")
+                        .font(.title)
                         .bold()
                         .foregroundColor(.green)
                         .padding()
@@ -96,14 +96,14 @@ struct VegetableQuizView: View {
                     }
                     .padding(.horizontal, 20)
                 }
-            }
+            }.toolbar(.hidden, for: .tabBar)
             .alert(isPresented: $showAlert) {
                 Alert(title: Text("Result"), message: Text(alertMessage), dismissButton: .default(Text("Next")) {
                     nextQuestion()
                 })
             }
             .padding()
-            .background(Color.blue.opacity(0.1).edgesIgnoringSafeArea(.all))
+            
         }
         
         func checkAnswer(_ selected: String) {

@@ -61,9 +61,8 @@ struct MazeGameView: View {
                 
                 InstructionView(startGame: startGame)
             }
-        }
+        }.toolbar(.hidden, for: .tabBar)
         .padding()
-        .background(Color.mint.edgesIgnoringSafeArea(.all))
         .alert("🎉 You Won! 🎉", isPresented: $showWinMessage) {
             Button("Play Again", action: resetGame)
         } message: {
@@ -110,7 +109,7 @@ struct InstructionView: View {
             Text("Game Instructions")
                 .font(.largeTitle)
                 .bold()
-                .foregroundColor(.white)
+                .foregroundColor(.black)
             
             VStack(alignment: .leading, spacing: 10) {
                 Text("➡️ Use the arrow buttons to move through the maze.")
@@ -119,10 +118,9 @@ struct InstructionView: View {
                 Text("⏳ Timer starts when you begin the game.")
             }
             .font(.title2)
-            .foregroundColor(.white)
+            .foregroundColor(.yellow)
             .padding()
-            .background(Color.gray.opacity(0.5))
-            .cornerRadius(10)
+            
             
             Button(action: startGame) {
                 Text("Start Game")
@@ -161,7 +159,7 @@ struct CellView: View {
     
     var body: some View {
         Rectangle()
-            .fill(isPlayer ? Color.blue : (value == 1 ? Color.gray : (value == 2 ? Color.green : Color.white)))
+            .fill(isPlayer ? Color.blue : (value == 1 ? Color.gray : (value == 2 ? Color.green : Color.mint)))
             .frame(width: 40, height: 40)
             .cornerRadius(5)
             .overlay(isPlayer ? Text("👦").font(.title) : nil)

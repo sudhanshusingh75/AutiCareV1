@@ -30,8 +30,7 @@ struct PictureRepresentingActionGameView: View {
     
     var body: some View {
         ZStack {
-            LinearGradient(gradient: Gradient(colors: [Color.blue.opacity(0.6), Color.purple.opacity(0.6)]), startPoint: .top, endPoint: .bottom)
-                .ignoresSafeArea()
+            
             
             if showDisclaimer {
                 DisclaimerView(startGame: { showDisclaimer = false })
@@ -40,7 +39,7 @@ struct PictureRepresentingActionGameView: View {
             } else {
                 gameView
             }
-        }
+        }.toolbar(.hidden, for: .tabBar)
     }
     
     var gameView: some View {
@@ -48,7 +47,7 @@ struct PictureRepresentingActionGameView: View {
             Text("Score: \(score)")
                 .font(.title2)
                 .bold()
-                .foregroundColor(.white)
+                .foregroundColor(.green)
                 .padding()
             
             
@@ -58,7 +57,7 @@ struct PictureRepresentingActionGameView: View {
             Text(question.text)
                 .font(.title)
                 .bold()
-                .foregroundColor(.white)
+                .foregroundColor(.black)
                 .padding()
                 .multilineTextAlignment(.center)
             
@@ -77,7 +76,7 @@ struct PictureRepresentingActionGameView: View {
             Image(imageName)
                 .resizable()
                 .scaledToFit()
-                .frame(width: 120, height: 120)
+                .frame(width: 170, height: 170)
                 .background(RoundedRectangle(cornerRadius: 15).fill(Color.white).shadow(radius: 5))
         }
     }
@@ -109,7 +108,7 @@ struct DisclaimerView: View {
             Text("Game Instructions")
                 .font(.largeTitle)
                 .bold()
-                .foregroundColor(.white)
+                .foregroundColor(.black)
             Text("Identify which image contains an object that should fly.")
                 .foregroundColor(.yellow)
                 .multilineTextAlignment(.center)
@@ -124,25 +123,26 @@ struct DisclaimerView: View {
             }
         }
         .padding()
-        .background(RoundedRectangle(cornerRadius: 20).fill(Color.black.opacity(0.8)))
-        .shadow(radius: 10)
+        
+        
     }
 }
 
 struct GameOverView: View {
     var score: Int
     var restartGame: () -> Void
+    var questions: Int = 5
     
     var body: some View {
         VStack(spacing: 20) {
             Text("Game Over")
                 .font(.largeTitle)
                 .bold()
-                .foregroundColor(.white)
+                .foregroundColor(.black)
             
-            Text("Final Score: \(score)")
+            Text("Final Score: \(score)/\(questions)")
                 .font(.title2)
-                .foregroundColor(.yellow)
+                .foregroundColor(.green)
             
             Button(action: restartGame) {
                 Text("Play Again")
@@ -154,8 +154,7 @@ struct GameOverView: View {
             }
         }
         .padding()
-        .background(RoundedRectangle(cornerRadius: 20).fill(Color.black.opacity(0.8)))
-        .shadow(radius: 10)
+        
     }
 }
 

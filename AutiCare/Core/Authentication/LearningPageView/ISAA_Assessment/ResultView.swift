@@ -4,6 +4,7 @@
 //
 //  Created by sourav_singh on 20/02/25.
 //
+
 import SwiftUI
 import Firebase
 import FirebaseFirestore
@@ -14,6 +15,9 @@ struct ResultView: View {
     let answers: [[Int]]
     let categories = ["Social Interaction", "Emotional Responsiveness", "Speech & Communication", "Behavior Patterns", "Sensory Aspects", "Cognitive Components"]
     let questionCounts = [9, 5, 9, 7, 6, 4]
+
+    @State private var showSuccessPopup = false // State to control the popup
+    @State private var navigateToLearningPage = false // State to control navigation
 
     var categoryDistributions: [[Double]] {
         answers.map { categoryAnswers in
@@ -40,64 +44,75 @@ struct ResultView: View {
     }
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .center) {
-                Text("Assessment Result")
-                    .font(.largeTitle)
-                    .bold()
-                    .padding()
-                    .frame(maxWidth: .infinity, alignment: .center)
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .center) {
+                    Text("Total Score: \(totalAutismScore)")
+                        .font(.title2)
+                        .foregroundColor(.green)
+                        .bold()
+                        .padding()
 
-                Text("Total Score: \(totalAutismScore)")
-                    .font(.title2)
-                    .foregroundColor(.green)
-                    .bold()
-                    .padding()
+                    Text("Autism Level: \(autismLevel)")
+                        .font(.title3)
+                        .foregroundColor(.mint)
+                        .bold()
+                        .padding(.bottom)
 
-                Text("Autism Level: \(autismLevel)")
-                    .font(.title3)
-                    .foregroundColor(.mint)
-                    .bold()
-                    .padding(.bottom)
+                    StackedBarChartView(categoryDistributions: categoryDistributions, categories: categories)
+                        .frame(height: 400)
+                        .padding()
 
-                StackedBarChartView(categoryDistributions: categoryDistributions, categories: categories)
-                    .frame(height: 400)
-                    .padding()
+                    ColorIndicatorView()
+                        .padding()
 
-                ColorIndicatorView()
-                    .padding()
+                    ForEach(0..<categories.count, id: \.self) { index in
+                        VStack(alignment: .leading) {
+                            Text("\(categories[index])")
+                                .font(.headline)
+                                .bold()
+                                .foregroundColor(.black)
+                                .padding(.top, 5)
+                                .frame(maxWidth: .infinity, alignment: .center)
 
-                ForEach(0..<categories.count, id: \.self) { index in
-                    VStack(alignment: .leading) {
-                        Text("\(categories[index])")
-                            .font(.headline)
-                            .bold()
-                            .foregroundColor(.black)
-                            .padding(.top, 5)
-                            .frame(maxWidth: .infinity, alignment: .center)
-
-                        Text(conclusion(for: categoryDistributions[index]))
-                            .font(.subheadline)
-                            .foregroundColor(.gray)
-                            .frame(maxWidth: .infinity, alignment: .center)
+                            Text(conclusion(for: categoryDistributions[index]))
+                                .font(.subheadline)
+                                .foregroundColor(.gray)
+                                .frame(maxWidth: .infinity, alignment: .center)
+                        }
+                        .padding()
                     }
+
+                    Button("Save Your Result") {
+                        saveResultToFirestore()
+                    }
+                    .foregroundColor(.white)
                     .padding()
+                    .frame(width: 200, height: 50)
+                    .background(Color.green)
+                    .cornerRadius(10)
+                    .shadow(radius: 5)
+                    .frame(maxWidth: .infinity, alignment: .center)
                 }
-
-                Button("Save Your Result") {
-                    saveResultToFirestore()
-                }
-                .foregroundColor(.white)
-                .padding()
-                .frame(width: 200, height: 50)
-                .background(Color.green)
-                .cornerRadius(10)
-                .shadow(radius: 5)
-                .frame(maxWidth: .infinity, alignment: .center)
             }
-        }.navigationBarBackButtonHidden(true)
+            .navigationBarBackButtonHidden(true) // Hide the back button
+            .background(Color(.systemGray6).edgesIgnoringSafeArea(.all))
+            .navigationTitle("Assessment Result")
+            .alert("Success", isPresented: $showSuccessPopup) {
+                Button("OK", role: .cancel) {
+                    // Navigate to LearningPageView after the popup is dismissed
+                    navigateToLearningPage = true
+                }
+            } message: {
+                Text("Assessment result saved successfully! You can check your progress in the progress tab")
+            }
+            .navigationDestination(isPresented: $navigateToLearningPage) {
+                LearningPageView()
+                    .navigationBarBackButtonHidden(true) // Hide the back button on LearningPageView
+            }
+        }
     }
-
+    
     func saveResultToFirestore() {
         guard let userId = Auth.auth().currentUser?.uid else {
             print("❌ User not authenticated")
@@ -106,7 +121,7 @@ struct ResultView: View {
         
         let db = Firestore.firestore()
         
-        
+        // Format category distributions for Firestore
         let formattedCategoryDistributions: [[String: Any]] = categoryDistributions.enumerated().map { index, distribution in
             return [
                 "category": categories[index],
@@ -114,18 +129,31 @@ struct ResultView: View {
             ]
         }
         
+        // Generate conclusions for each category
+        let categoryConclusions: [[String: Any]] = categoryDistributions.enumerated().map { index, distribution in
+            return [
+                "category": categories[index],
+                "conclusion": conclusion(for: distribution) // Use the existing conclusion function
+            ]
+        }
+        
+        // Prepare the data to be saved
         let resultData: [String: Any] = [
-            "categoryDistributions": formattedCategoryDistributions,
+            "categoryDistributions": formattedCategoryDistributions, // Bar graph data
+            "categoryConclusions": categoryConclusions, // Text-based conclusions
             "totalAutismScore": totalAutismScore,
             "autismLevel": autismLevel,
             "date": Timestamp()
         ]
 
+        // Save the data to Firestore
         db.collection("Users").document(userId).collection("assessmentResults").addDocument(data: resultData) { error in
             if let error = error {
                 print("❌ Error saving result: \(error.localizedDescription)")
             } else {
-                print("✅ Assessment result saved successfully!")
+                print("✅ Assessment result saved successfully! You can view your results in the Progress tab.")
+                // Show the success popup
+                showSuccessPopup = true
             }
         }
     }
@@ -152,9 +180,8 @@ struct StackedBarChartView: View {
             // Chart Title
             Text("Severity Levels by Category")
                 .font(.headline)
-                .padding(.bottom, 10)
+                .padding(.bottom, 40)
 
-            
             Chart {
                 ForEach(Array(categories.enumerated()), id: \.offset) { index, category in
                     let distribution = categoryDistributions[index]
@@ -163,13 +190,14 @@ struct StackedBarChartView: View {
                         BarMark(
                             x: .value("Category", index), // Use index for positioning
                             y: .value("Severity", value),
-                            width: .fixed(30) // ✅ Increased width of bars
+                            width: .fixed(20) // ✅ Increased width of bars
                         )
                         .foregroundStyle(severityColors[severityIndex])
                         .cornerRadius(5)
                         .opacity(0.9)
                         .annotation(position: .top) {
-                            if severityIndex == severityColors.count - 1, value > 0 { // ✅ Show only red color (Severe) percentage
+                            // Show percentage only for the last severity level (Severe)
+                            if severityIndex == severityColors.count - 1 { // ✅ Show only red color (Severe) percentage
                                 Text("\(Int(value))%")
                                     .font(.caption)
                                     .foregroundColor(.white)
@@ -183,13 +211,14 @@ struct StackedBarChartView: View {
             }
             .chartXAxis(.hidden)
             .chartYAxis {
-                AxisMarks(position: .leading) // Add Y-axis marks for better readability
+                AxisMarks(position: .leading, values: .automatic(desiredCount: 5)) // Add Y-axis marks
             }
+            .chartYScale(domain: 0...100) // Set Y-axis range to 0 to 100
             .chartLegend(position: .bottom, alignment: .center) // Add a legend for severity levels
-            .frame(height: 300) // Adjust height for better visibility
+            .frame(height: 200) // Adjust height for better visibility
 
             // Custom X-Axis Labels
-            HStack(alignment: .center, spacing: 6) { // ✅ Reduced space between bars
+            HStack(alignment: .center, spacing: 2) { // ✅ Reduced space between bars
                 ForEach(Array(categories.enumerated()), id: \.offset) { index, category in
                     Text(category)
                         .font(.caption)
@@ -203,7 +232,6 @@ struct StackedBarChartView: View {
         .padding()
     }
 }
-
 struct ColorIndicatorView: View {
     let severityLevels = ["No Autism", "Mild", "Moderate", "High", "Severe"]
     let colors: [Color] = [.green, .blue, .yellow, .orange, .red]

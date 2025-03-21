@@ -19,6 +19,7 @@
 /* Begin PBXFileReference section */
 		2532395D2D4CDDEB008DBFDC /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		25B4D0462D3CFF2D00E4E298 /* AutiCare.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AutiCare.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		44A584C62D8D179300A2E7A4 /* Auticare.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = Auticare.entitlements; path = Auticare/Auticare.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -62,6 +63,7 @@
 		25B4D03D2D3CFF2D00E4E298 = {
 			isa = PBXGroup;
 			children = (
+				44A584C62D8D179300A2E7A4 /* Auticare.entitlements */,
 				2532395D2D4CDDEB008DBFDC /* GoogleService-Info.plist */,
 				25B4D0482D3CFF2D00E4E298 /* AutiCare */,
 				25B4D0472D3CFF2D00E4E298 /* Products */,
@@ -292,6 +294,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Auticare/Auticare.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"AutiCare/Preview Content\"";
@@ -323,6 +326,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Auticare/Auticare.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"AutiCare/Preview Content\"";

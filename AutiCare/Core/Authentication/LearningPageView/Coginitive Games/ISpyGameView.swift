@@ -23,7 +23,7 @@ struct ISpyGameView: View {
     
     var body: some View {
         ZStack {
-            Color.purple.opacity(0.2).edgesIgnoringSafeArea(.all)
+            Color.white.edgesIgnoringSafeArea(.all)
             VStack {
                 if showRules {
                     RulesView(showRules: $showRules)
@@ -34,7 +34,7 @@ struct ISpyGameView: View {
                 }
             }
             .padding()
-        }
+        }.toolbar(.hidden, for: .tabBar)
     }
     
     private func restartGame() {
@@ -54,26 +54,25 @@ struct RulesView: View {
     
     var body: some View {
         VStack {
-            Text("I Spy Game Rules")
+            Text("Game Instructions")
                 .font(.largeTitle)
                 .bold()
-                .foregroundColor(.blue)
+                .foregroundColor(.black)
                 .padding()
             Text("1. Look at the description given.\n2. Tap on the correct object from the choices.\n3. Each correct answer gives you points.\n4. Try to get the highest score!")
                 .multilineTextAlignment(.center)
-                .foregroundColor(.black)
+                .foregroundColor(.yellow)
                 .padding()
             Button("Start Game") {
                 showRules = false
             }
             .padding()
-            .background(Color.blue)
+            .background(Color.green)
             .foregroundColor(.white)
             .cornerRadius(15)
             .shadow(radius: 5)
         }
-        .background(Color.yellow.opacity(0.3))
-        .cornerRadius(20)
+        
         .padding()
     }
 }
@@ -152,8 +151,7 @@ struct ScoreView: View {
             .cornerRadius(15)
             .shadow(radius: 5)
         }
-        .background(Color.orange.opacity(0.3))
-        .cornerRadius(20)
+       
         .padding()
     }
 }

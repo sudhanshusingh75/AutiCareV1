@@ -59,7 +59,7 @@ struct geometricalShapeView: View {
                     .padding()
                     .background(Color.yellow.opacity(0.1).edgesIgnoringSafeArea(.all))
                 } else {
-                    Text("Shape!")
+                    Text("Identify the Shape!")
                         .font(.largeTitle)
                         .bold()
                         .foregroundColor(.green)
@@ -101,9 +101,9 @@ struct geometricalShapeView: View {
                 Alert(title: Text("Result"), message: Text(alertMessage), dismissButton: .default(Text("Next")) {
                     nextQuestion()
                 })
-            }
+            }.toolbar(.hidden, for: .tabBar)
             .padding()
-            .background(Color.blue.opacity(0.1).edgesIgnoringSafeArea(.all))
+            
         }
         
         func checkAnswer(_ selected: String) {

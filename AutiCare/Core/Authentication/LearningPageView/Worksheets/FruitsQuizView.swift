@@ -62,7 +62,7 @@ struct FruitsQuizView: View {
                     Text("Guess the Fruit!")
                         .font(.largeTitle)
                         .bold()
-                        .foregroundColor(.pink)
+                        .foregroundColor(.orange)
                         .padding()
                     
                     ProgressView(value: progress)
@@ -96,14 +96,14 @@ struct FruitsQuizView: View {
                     }
                     .padding(.horizontal, 20)
                 }
-            }
+            }.toolbar(.hidden, for: .tabBar)
             .alert(isPresented: $showAlert) {
                 Alert(title: Text("Result"), message: Text(alertMessage), dismissButton: .default(Text("Next")) {
                     nextQuestion()
                 })
             }
             .padding()
-            .background(Color.blue.opacity(0.1).edgesIgnoringSafeArea(.all))
+            
         }
         
         func checkAnswer(_ selected: String) {

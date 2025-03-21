@@ -40,8 +40,7 @@ struct MathQuizView: View {
     
     var body: some View {
         ZStack {
-            LinearGradient(gradient: Gradient(colors: [Color.blue.opacity(0.2), Color.purple.opacity(0.2)]), startPoint: .topLeading, endPoint: .bottomTrailing)
-                .edgesIgnoringSafeArea(.all)
+            
             
             VStack(spacing: 20) {
                 if quizCompleted {
@@ -129,7 +128,7 @@ struct MathQuizView: View {
                 }
             }
             .padding()
-        }
+        }.toolbar(.hidden, for: .tabBar)
         .alert(isPresented: $showAlert) {
             Alert(title: Text("Result"), message: Text(alertMessage), dismissButton: .default(Text("Next")) {
                 nextQuestion()
