@@ -60,17 +60,18 @@ struct AddNewPostView: View {
                     
                     HStack(spacing:20) {
                         Spacer()
-                        PhotosPicker(selection: $viewModel.selectedItems, matching: .images, photoLibrary: .shared()){
-                            Button { } label: {
-                                Image(systemName: "camera")
-                                    .resizable()
-                                    .scaledToFill()
-                                    .frame(width: 18,height: 18)
-                            }
-                        }
+//                        PhotosPicker(selection: $viewModel.selectedItems, matching: .images, photoLibrary: .shared()){
+//                            Button { } label: {
+//                                Image(systemName: "camera")
+//                                    .resizable()
+//                                    .scaledToFill()
+//                                    .frame(width: 18,height: 18)
+//                            }
+//                        }
                         PhotosPicker(selection: $viewModel.selectedItems, matching: .images, photoLibrary: .shared()){
                             Image(systemName: "photo")
                                 .resizable()
+                                .foregroundStyle(Color.init(red: 0, green: 0.387, blue: 0.5))
                                 .scaledToFill()
                                 .frame(width: 18,height: 18)
                         }.onChange(of: viewModel.selectedItems) { _ , _ in viewModel.loadImages() }
@@ -90,8 +91,8 @@ struct AddNewPostView: View {
                                 Text(tag)
                                     .padding(.vertical, 8)
                                     .frame(maxWidth: .infinity)
-                                    .background(viewModel.selectedTag == tag ? Color.blue.opacity(0.2) : Color.gray.opacity(0.1))
-                                    .foregroundColor(viewModel.selectedTag == tag ? .blue : .black)
+                                    .background(viewModel.selectedTag == tag ? Color.init(red: 0, green: 0.387, blue: 0.5) : Color.gray.opacity(0.1))
+                                    .foregroundColor(viewModel.selectedTag == tag ? .white : .black)
                                     .clipShape(RoundedRectangle(cornerRadius: 10))
                                     .onTapGesture {
                                         viewModel.selectedTag = tag
@@ -123,4 +124,5 @@ struct AddNewPostView: View {
         .padding()
     }
 }
+
 
