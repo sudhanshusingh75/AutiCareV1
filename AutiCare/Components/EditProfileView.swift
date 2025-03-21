@@ -102,8 +102,8 @@ struct EditProfileView: View {
                     }
                     InputView(text: $fullName, title: "Full Name", placeholder: "")
                     InputView(text: $userName, title: "Username", placeholder: "")
-                    InputView(text: $bio, title: "Bio", placeholder: "Tell something about yourself")
-                    InputView(text: $location, title: "Location", placeholder: "Select Your Location")
+                    InputView(text: $bio, title: "Bio", placeholder: "Tell Something About Yourself")
+                    InputView(text: $location, title: "Address", placeholder: "Enter Your Address")
                     InputView(text: $gender, title: "Gender", placeholder: "Select Your Gender")
                     InputView(text: $email, title: "Email", placeholder: "")
                 }.padding()

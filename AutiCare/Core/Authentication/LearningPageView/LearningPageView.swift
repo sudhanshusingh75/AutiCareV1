@@ -65,6 +65,7 @@ struct LearningPageView: View {
             }
             .background(Color(.systemGray6).edgesIgnoringSafeArea(.all))
             .navigationTitle("Learning")
+            .navigationBarTitleDisplayMode(.inline)
             .onAppear {
                 checkAssessmentStatus()
             }

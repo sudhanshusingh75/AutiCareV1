@@ -36,6 +36,7 @@ struct ProgressTabView: View {
                 }
             }
             .navigationTitle("Progress")
+            .navigationBarTitleDisplayMode(.inline)
             .onAppear {
                 progressViewModel.fetchAssessmentResults()
             }

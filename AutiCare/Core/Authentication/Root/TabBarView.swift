@@ -13,7 +13,7 @@ struct TabBarView: View {
         TabView{
             CommunityView()
             .tabItem {
-                Label("Home", systemImage: "house")
+                Label("Community", systemImage: "person.3.fill")
             }
             LearningPageView()
                 .tabItem {

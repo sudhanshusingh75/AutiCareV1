@@ -52,7 +52,7 @@ struct SearchView: View {
             .task{
                 await viewModel.fetchAllUsers()
             }
-            .searchable(text: $inputText, placement: .toolbar, prompt: "Search")
+            .searchable(text: $inputText, placement: .toolbar, prompt: "Search Users")
         }
     }
 }
