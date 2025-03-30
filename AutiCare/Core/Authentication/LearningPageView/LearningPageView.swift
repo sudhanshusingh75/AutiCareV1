@@ -53,9 +53,7 @@ struct LearningPageView: View {
                                     description: "These games help enhance problem-solving skills, attention span, and logical thinking in an interactive way.",
                                     games: cognitiveGames)
 
-                    VideoSectionView(title: "Sessions",
-                                     description: "Engaging video content to aid in learning and development, covering various essential skills.",
-                                     videos: learningVideos)
+                    VideosSection(title: "Sessions", description: "Engaging Video content to aid learning and development, Covering various essential skills")
 
                     WorksheetSectionView(title: "Worksheets",
                                          description: "Fun and interactive worksheets to help kids learn through activities.",
@@ -100,15 +98,15 @@ let cognitiveGames = [
     
 ]
 
-let learningVideos = [
-    LearningVideo(title: "In School", fileName: "GoingToSchool"),
-    LearningVideo(title: "While Playing", fileName: "whilePlaying"),
-    LearningVideo(title: "When I Feel sad", fileName: "feelingSad"),
-    LearningVideo(title: "Class Manners", fileName: "behavingInClass"),
-    LearningVideo(title: "Playing With Friends", fileName: "playingWithFriends"),
-    LearningVideo(title: "While Playing", fileName: "whilePlaying"),
-    LearningVideo(title: "House Ettiquetes", fileName: "howToBehaveWithGuests")
-]
+//let learningVideos = [
+//    Videos(name: "In School", url: "GoingToSchool"),
+//    Videos(name: "While Playing", url: "whilePlaying"),
+//    Videos(name: "When I Feel sad", url: "feelingSad"),
+//    Videos(name: "Class Manners", url: "behavingInClass"),
+//    Videos(name: "Playing With Friends", url: "playingWithFriends"),
+//    Videos(name: "While Playing", url: "whilePlaying"),
+//    Videos(name: "House Ettiquetes", url: "howToBehaveWithGuests")
+//]
 
 
 let worksheets = [
@@ -126,11 +124,11 @@ struct Game: Identifiable {
     let destination: AnyView
 }
 
-struct LearningVideo: Identifiable {
-    let id = UUID()
-    let title: String
-    let fileName: String
-}
+//struct LearningVideo: Identifiable {
+//    let id = UUID()
+//    let title: String
+//    let fileName: String
+//}
 
 struct Worksheet: Identifiable {
     let id = UUID()
@@ -181,70 +179,6 @@ struct GameSectionView: View {
                     ForEach(games) { game in
                         NavigationLink(destination: game.destination) {
                             GameCardView(game: game)
-                        }
-                    }
-                }
-                .padding(.horizontal)
-            }
-        }
-    }
-}
-
-struct VideoSectionView: View {
-    let title: String
-    let description: String
-    let videos: [LearningVideo]
-    
-    @State private var showDescription = false
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack {
-                Text(title)
-                    .font(.title2)
-                    .fontWeight(.bold)
-                    .foregroundColor(.white)
-                
-                Button(action: {
-                    showDescription.toggle()
-                }) {
-                    Image(systemName: "info.circle")
-                        .foregroundColor(.white)
-                }
-                .alert(title, isPresented: $showDescription) {
-                    Button("OK", role: .cancel) {}
-                } message: {
-                    Text(description)
-                }
-            }
-            .padding()
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color.mint)
-            .cornerRadius(15)
-            .padding(.horizontal)
-            
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 15) {
-                    ForEach(videos) { video in
-                        NavigationLink(destination: VideoPlayerView(fileName: video.fileName)) {
-                            VStack {
-                                Image(.videoPlayButton)
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: 100, height:100)
-                                    .background(Color.white)
-                                    .clipShape(Circle())
-                                    .shadow(radius: 5)
-                                
-                                Text(video.title)
-                                    .font(.headline)
-                                    .foregroundColor(.black)
-                                    .padding(.top, 5)
-                            }
-                            .frame(width: 160, height: 180)
-                            .background(Color.white)
-                            .cornerRadius(15)
-                            
                         }
                     }
                 }
@@ -347,14 +281,7 @@ struct GameCardView: View {
             }
 }
 
-struct VideoPlayerView: View {
-    let fileName: String
-    
-    var body: some View {
-        VideoPlayerController(fileName: fileName)
-            .edgesIgnoringSafeArea(.all)
-    }
-}
+
 
 // Wrapper to force landscape mode
 struct VideoPlayerController: UIViewControllerRepresentable {

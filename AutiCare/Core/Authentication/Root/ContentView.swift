@@ -9,9 +9,13 @@ import SwiftUI
 
 struct ContentView: View {
     @EnvironmentObject var viewModel:AuthViewModel
+    @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
     var body: some View {
         Group{
-            if viewModel.userSession != nil{
+            if !hasSeenOnboarding{
+                OnboardingScreen()
+            }
+            else if viewModel.userSession != nil{
                 TabBarView()
             }
             else{

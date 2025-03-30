@@ -7,6 +7,8 @@
 
 import Foundation
 
-struct Videos{
-    
+struct Videos:Identifiable,Codable{
+    var id:String{name}
+    let name:String
+    let url:String
 }
