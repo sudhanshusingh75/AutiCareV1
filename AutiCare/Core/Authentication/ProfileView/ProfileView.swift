@@ -57,18 +57,21 @@ struct ProfileView: View {
                         // Name and Bio
                         VStack(alignment: .leading, spacing: 4) {
                             Text(user.fullName)
-                                .font(.footnote)
+                                .font(.subheadline)
                                 .fontWeight(.semibold)
                             
                             Text(user.userName)
                                 .font(.footnote)
+                            Text(user.bio ?? "")
+                                .font(.footnote)
+                                .foregroundStyle(Color.gray)
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.horizontal)
                         
                         // Action button to edit profile
                         NavigationLink {
-                            if let user = authVM.currentUser {
+                            if let user = profileVM.user {
                                 EditProfileView(user: user)
                                     .navigationBarBackButtonHidden(true)
                             }
@@ -139,7 +142,7 @@ struct ProfileView: View {
                     }
                     ToolbarItem {
                         NavigationLink {
-                            SettingsView()
+                            SettingsView(profileVM: profileVM)
                         } label: {
                             Image(systemName: "line.3.horizontal")
                                 .foregroundStyle(Color.init(red: 0, green: 0.387, blue: 0.5))
@@ -159,7 +162,6 @@ struct ProfileView: View {
                 profileVM.fetchUser(userId: userId)
                 profileVM.fetchMyPosts(userId: userId)
             }
-            
         }
     }
     

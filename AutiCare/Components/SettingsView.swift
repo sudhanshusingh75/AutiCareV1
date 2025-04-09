@@ -9,6 +9,7 @@ import SwiftUI
 
 struct SettingsView: View {
     @EnvironmentObject var authVM: AuthViewModel
+    @ObservedObject var profileVM: ProfileViewModel
     @State private var showEditView = false
     var body: some View {
         Form {
@@ -28,7 +29,7 @@ struct SettingsView: View {
                 }
                 
                 .fullScreenCover(isPresented: $showEditView) {
-                    if let user = authVM.currentUser{
+                    if let user = profileVM.user{
                         EditProfileView(user: user)
                     }
                 }
@@ -68,6 +69,3 @@ struct SettingsView: View {
     }
 }
 
-#Preview {
-    SettingsView()
-}

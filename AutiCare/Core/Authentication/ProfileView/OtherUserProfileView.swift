@@ -34,7 +34,7 @@ struct OtherUserProfileView: View {
                         } else {
                             Text(user.initials)
                                 .font(.largeTitle)
-                                .frame(width: 150, height: 150)
+                                .frame(width: 80, height: 80)
                                 .background(Color.gray.opacity(0.3))
                                 .clipShape(Circle())
                                 .padding(.all, 5)

@@ -26,7 +26,5 @@
 	<true/>
 	<key>GOOGLE_APP_ID</key>
 	<string>1:163638552235:ios:50194f2ab88986ff7ef9ee</string>
-	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>We need your location to personalize your experience</string>
 </dict>
 </plist>

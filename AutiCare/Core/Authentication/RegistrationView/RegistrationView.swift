@@ -13,8 +13,16 @@ struct RegistrationView: View {
     @State private var confirmPassword: String = ""
     @State private var userName:String = ""
     @State private var dateOfBirth:Date = Date()
+    @State private var dateOfBirthSet = false
+    
+    var formattedDOB: String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "dd/MM/yyyy"
+        return formatter.string(from: dateOfBirth)
+    }
+    
     @State private var selectedGender: String = "Select Gender"
-    let genders = ["Select Gender","Male", "Female", "Other"]
+    let genders = ["Select Gender","Male", "Female", "Prefer Not To Say"]
     
     @State private var selectedUIImage: UIImage?
     @State private var photosPickerItem: PhotosPickerItem?
@@ -84,14 +92,15 @@ struct RegistrationView: View {
                                     .font(.footnote)
                                     .fontWeight(.semibold)
                                 Spacer()
-                                Text("DD/MM/YYYY")
+                                Text(dateOfBirthSet ? formattedDOB : "DD/MM/YYYY")
                                     .font(.system(size: 14))
-                                    .foregroundStyle(Color(.placeholderText))
+                                    .foregroundStyle(dateOfBirthSet ? .black : Color(.placeholderText))
                             }
                             DatePicker("", selection: $dateOfBirth,displayedComponents: .date)
                                 .datePickerStyle(.compact)
                                 .frame(height:44)
                                 .onChange(of: dateOfBirth){
+                                    dateOfBirthSet = true
                                     validateDOB()
                                 }
                         }
@@ -112,10 +121,16 @@ struct RegistrationView: View {
                                     .font(.footnote)
                                     .fontWeight(.semibold)
                                 Spacer()
-                                Text("Select Your Gender")
-                                    .font(.system(size: 14))
-                                    .foregroundStyle(Color(.placeholderText))
-                                    
+                                if selectedGender == "Select Gender"{
+                                    Text("Select Gender")
+                                        .font(.system(size: 14))
+                                        .foregroundStyle(Color(.placeholderText))
+                                }
+                                else{
+                                    Text(selectedGender)
+                                        .font(.system(size:14))
+                                        .foregroundStyle(Color(.black))
+                                }
                             }
                             Spacer()
                             Picker("Select Gender", selection: $selectedGender) {
@@ -223,8 +238,8 @@ extension RegistrationView: AuthenticationProtocol {
         let today = Date()
         let ageComponents = calendar.dateComponents([.year], from: dateOfBirth, to: today)
         
-        if let age = ageComponents.year, age < 13 {
-            dobErrorMessage = "You must be at least 13 years old."
+        if let age = ageComponents.year, age < 16 {
+            dobErrorMessage = "You must be at least 16 years old."
         } else {
             dobErrorMessage = ""
         }

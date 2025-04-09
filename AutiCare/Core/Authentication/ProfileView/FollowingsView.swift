@@ -15,7 +15,9 @@ struct FollowingsView: View {
     @Environment(\.dismiss) var dismiss
     let currentUserId:String = Auth.auth().currentUser?.uid ?? ""
     var filteredFollowings: [User] {
-            // Filter followers based on search text
+        if inputText.isEmpty{
+            return viewModel.followings.filter { $0.id != currentUserId }
+        }
         return viewModel.followings.filter { user in
                 user.id != currentUserId &&
                 (user.fullName.localizedCaseInsensitiveContains(inputText) ||

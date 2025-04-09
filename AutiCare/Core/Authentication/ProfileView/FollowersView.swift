@@ -14,13 +14,16 @@ struct FollowersView: View {
     @Environment(\.dismiss) var dismiss
     let currentUserId:String = Auth.auth().currentUser?.uid ?? ""
     var filteredFollowers: [User] {
-            // Filter followers based on search text
+        if inputText.isEmpty{
+            return viewModel.followers.filter { $0.id != currentUserId }
+        }
+        else{
             return viewModel.followers.filter { user in
                 user.id != currentUserId &&
-                (user.fullName.localizedCaseInsensitiveContains(inputText) ||
-                 user.userName.localizedCaseInsensitiveContains(inputText))
+                (user.fullName.localizedCaseInsensitiveContains(inputText) || (user.userName.localizedCaseInsensitiveContains(inputText)))
             }
         }
+    }
     
     var body: some View {
         NavigationStack{
@@ -46,7 +49,6 @@ struct FollowersView: View {
                         }
                     }
                 }
-                
             }
             .task{
                 await viewModel.fetchFollowers(for: currentUserId)

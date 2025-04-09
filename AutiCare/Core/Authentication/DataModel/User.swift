@@ -10,10 +10,10 @@ import Foundation
 
 struct User: Identifiable, Codable {
     let id: String
-    let fullName: String
+    var fullName: String
     let email: String
     let userName: String
-    let profileImageURL: String?
+    var profileImageURL: String?
     var location:String? = ""
     var dob:Date
     var gender:String

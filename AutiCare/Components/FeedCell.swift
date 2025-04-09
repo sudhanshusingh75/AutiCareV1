@@ -25,12 +25,13 @@ struct FeedCell: View {
                //Header Section of the Feed
                 if post.userId == currentUser?.uid{
                     NavigationLink(destination: ProfileView()){
-                        if let urlString = post.profileImageURL, let url = URL(string: urlString), !urlString.isEmpty {
+                        if let urlString = post.profileImageURL,!urlString.isEmpty,let url = URL(string: urlString) {
                             WebImage(url: url)
                                 .resizable()
                                 .frame(width: 50, height: 50)
                                 .clipShape(Circle())
-                        } else {
+                        }
+                        else{
                             Text(post.initials)
                                 .font(.title3)
                                 .frame(width: 50, height: 50)
@@ -51,13 +52,22 @@ struct FeedCell: View {
                 }
                 else{
                     NavigationLink(destination: OtherUserProfileView(userId: post.userId)){
-                        if let url = URL(string: post.profileImageURL ?? ""){
+                        if let urlString = post.profileImageURL,!urlString.isEmpty,let url = URL(string: urlString){
                             WebImage(url: url)
                                 .resizable()
                                 .frame(width: 50,height: 50)
                                 .clipShape(Circle())
                             
                         }
+                        else{
+                            Text(post.initials)
+                                .font(.title3)
+                                .frame(width: 50, height: 50)
+                                .foregroundColor(.black)
+                                .background(Color.gray.opacity(0.3))
+                                .clipShape(Circle())
+                        }
+                        
                         VStack(alignment:.leading){
                             Text(post.fullName)
                                 .font(.callout)
