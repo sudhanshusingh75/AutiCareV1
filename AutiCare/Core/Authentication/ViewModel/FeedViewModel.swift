@@ -16,7 +16,6 @@ class FeedViewModel: ObservableObject,Identifiable {
     @Published var isLoading: Bool = false
     private let db = Firestore.firestore()
     @Published var userId:String = (Auth.auth().currentUser?.uid ?? "")
-    @Published var explorePosts: [Posts] = []
     @Published var isDeleting = false
     @Published var connections: [String: Bool] = [:]
     let supabase = SupabaseClient(
@@ -44,37 +43,76 @@ class FeedViewModel: ObservableObject,Identifiable {
             }
             DispatchQueue.main.async {
                 self.posts = fetchedPosts
-                self.explorePosts = fetchedPosts
                 self.isLoading = false
             }
         }
     }
     
-    func fetchExplorePosts(tags: [String]) {
+//    func fetchExplorePosts(tags: [String]) {
+//        isLoading = true
+//        var query = db.collection("Posts").order(by: "createdAt", descending: true)
+//
+//        if !tags.isEmpty {
+//            query = query.whereField("tag", arrayContainsAny: tags) // ✅ Only apply filter if tags exist
+//        }
+//
+//        query.addSnapshotListener { snapshot, error in
+//            if let error = error {
+//                print("❌ Error fetching explore posts: \(error.localizedDescription)")
+//                return
+//            }
+//            guard let snapshot = snapshot else { return }
+//
+//            let explorePosts = snapshot.documents.compactMap { document in
+//                try? document.data(as: Posts.self)
+//            }
+//
+//            DispatchQueue.main.async {
+//                self.explorePosts = explorePosts
+//                self.isLoading = false
+//            }
+//        }
+//    }
+    
+//    func fetchFilteredPosts(tag:String){
+//        isLoading = true
+//        db.collection("Posts").whereField("tag", isEqualTo: tag)
+//            .order(by: "createdAt", descending: true)
+//            .getDocuments { snapshot, error in
+//                if let error = error {
+//                    print("Error fetching posts for tag \(tag): \(error.localizedDescription)")
+//                    return
+//                }
+//                guard let documents = snapshot?.documents else { return }
+//                self.posts = documents.compactMap{doc -> Posts? in
+//                    try? doc.data(as: Posts.self)
+//                }
+//            }
+//    }
+    func fetchPosts(forTag tag: String) {
         isLoading = true
-        var query = db.collection("Posts").order(by: "createdAt", descending: true)
-
-        if !tags.isEmpty {
-            query = query.whereField("tag", arrayContainsAny: tags) // ✅ Only apply filter if tags exist
-        }
-
-        query.addSnapshotListener { snapshot, error in
-            if let error = error {
-                print("❌ Error fetching explore posts: \(error.localizedDescription)")
-                return
+        db.collection("Posts")
+            .whereField("tag", arrayContains: tag) // 👈 Fetch posts that contain the tag
+            .order(by: "createdAt", descending: true)
+            .addSnapshotListener { snapshot, error in
+                if let error = error {
+                    print("❌ Error listening for tag posts: \(error.localizedDescription)")
+                    return
+                }
+                guard let snapshot = snapshot else {
+                    print("❌ Error fetching tag posts: \(error!.localizedDescription)")
+                    return
+                }
+                let fetchedPosts = snapshot.documents.compactMap { document in
+                    try? document.data(as: Posts.self)
+                }
+                DispatchQueue.main.async {
+                    self.posts = fetchedPosts
+                    self.isLoading = false
+                }
             }
-            guard let snapshot = snapshot else { return }
-
-            let explorePosts = snapshot.documents.compactMap { document in
-                try? document.data(as: Posts.self)
-            }
-
-            DispatchQueue.main.async {
-                self.explorePosts = explorePosts
-                self.isLoading = false
-            }
-        }
     }
+
 
 
     func toggleLike(for post: Posts) {

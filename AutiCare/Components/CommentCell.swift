@@ -26,7 +26,13 @@ struct CommentCell: View {
                         .clipShape(Circle())
                     
                     
-            }
+                }else{
+                    Text(comment.initials)
+                        .font(.title3)
+                        .frame(width: 30, height: 30)
+                        .background(Color.gray.opacity(0.3))
+                        .clipShape(Circle())
+                }
             // Comment Content
             VStack(alignment: .leading, spacing: 5) {
                 HStack{

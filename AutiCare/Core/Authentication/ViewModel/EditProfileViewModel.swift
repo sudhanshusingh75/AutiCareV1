@@ -174,6 +174,33 @@ class EditProfileViewModel:ObservableObject{
         }
     }
     
+    func updateProfileImageInPosts(newProfileImageURL:String){
+        let db = Firestore.firestore()
+        guard let userId = Auth.auth().currentUser?.uid else { return }
+        
+        db.collection("Posts")
+            .whereField("userId", isEqualTo: userId)
+            .getDocuments { snapshot, error in
+                if let error = error {
+                    print("❌ Error fetching user's posts: \(error.localizedDescription)")
+                    return
+                }
+                guard let documents = snapshot?.documents else { return }
+                for document in documents {
+                    document.reference.updateData([
+                        "profileImageURL": newProfileImageURL
+                    ]) { error in
+                        if let error = error {
+                            print("❌ Error updating post profile image: \(error.localizedDescription)")
+                        } else {
+                            print("✅ Successfully updated profile image in a post.")
+                        }
+                    }
+                }
+            }
+    }
+    
+    
     func saveChanges() async {
         guard let user = user else { return }
 
@@ -193,6 +220,8 @@ class EditProfileViewModel:ObservableObject{
             gender: gender,
             bio: bio
         )
+        
+        updateProfileImageInPosts(newProfileImageURL: imageUrl)
 
         await MainActor.run {
             self.user?.fullName = self.fullName

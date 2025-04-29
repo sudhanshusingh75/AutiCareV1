@@ -43,6 +43,14 @@ struct EditProfileView: View {
                                 }
                                 .shadow(radius: 2)
                         }
+                        else {
+                            Text(vm.user?.initials ?? "")
+                                .font(.title3)
+                                .frame(width: 100, height: 100)
+                                .foregroundColor(.black)
+                                .background(Color.gray.opacity(0.3))
+                                .clipShape(Circle())
+                        }
                     }
                     .onChange(of: vm.photosPickerItem) { _,_ in
                         Task{

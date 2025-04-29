@@ -46,7 +46,9 @@ struct OtherUserProfileView: View {
                             NavigationLink(destination: FollowersView()) {
                                 UserStatView(value: user.followers?.count ?? 0, title: "Followers")
                             }
-                            UserStatView(value: 3, title: "Following")
+                            NavigationLink(destination: FollowingsView()) {
+                                UserStatView(value: user.followings?.count ?? 0, title: "Following")
+                            }
                         }
                     }
                     .padding(.horizontal)
