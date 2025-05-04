@@ -240,5 +240,14 @@ class AuthViewModel: ObservableObject {
             }
         }
     
+    func forgotPassword(email: String) async throws {
+        do {
+            try await Auth.auth().sendPasswordReset(withEmail: email)
+        } catch {
+            print("Error sending reset link:", error.localizedDescription)
+            throw error // ✅ This is the key change
+        }
+    }
+    
 }
 
