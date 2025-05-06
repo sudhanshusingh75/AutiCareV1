@@ -12,6 +12,9 @@ protocol AuthenticationProtocol {
 class AuthViewModel: ObservableObject {
     @Published var userSession: FirebaseAuth.User?
     @Published var currentUser: User?
+    @Published var alertMessage: String = ""
+    @Published var showAlert: Bool = false
+    
     private let supabase: SupabaseClient
     private let storage: SupabaseStorageClient
     
@@ -39,8 +42,10 @@ class AuthViewModel: ObservableObject {
             self.userSession = result.user
             await fetchUser()
         } catch {
-            print("❌ Error \(error.localizedDescription)")
-            throw error
+            DispatchQueue.main.async {
+                        self.alertMessage = error.localizedDescription
+                        self.showAlert = true
+            }
         }
     }
     

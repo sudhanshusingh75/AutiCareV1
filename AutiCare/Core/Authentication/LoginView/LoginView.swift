@@ -60,7 +60,16 @@ struct LoginView: View {
                 ButtonView(title: "SIGN IN") {
                     Task {
                         try await viewModel.signIn(withEmail: email, password: password)
+                        
                     }
+                    
+                }
+                .alert(isPresented: $viewModel.showAlert) {
+                    Alert(
+                        title: Text("Login Error"),
+                        message: Text(viewModel.alertMessage),
+                        dismissButton: .default(Text("OK"))
+                    )
                 }
                 .disabled(!formIsValid)
                 .opacity(formIsValid ? 1.0 : 0.5)
