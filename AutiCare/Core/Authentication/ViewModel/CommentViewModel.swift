@@ -19,39 +19,87 @@ class CommentViewModel: ObservableObject {
         self.postId = postId
     }
     
+//    func fetchComments() {
+//        db.collection("Comments")
+//            .whereField("postId", isEqualTo: self.postId) // ✅ Explicitly use 'self'
+//            .order(by: "createdAt", descending: true)
+//            .addSnapshotListener { [weak self] snapshot, error in
+//                guard let self = self else { return } // ✅ Prevent retain cycles
+//                
+//                if let error = error {
+//                    print("❌ Error fetching comments: \(error.localizedDescription)")
+//                    return
+//                }
+//                
+//                guard let snapshot = snapshot, !snapshot.documents.isEmpty else {
+//                    DispatchQueue.main.async {
+//                        self.comments = [] // ✅ Clear comments if no data
+//                    }
+//                    print("⚠️ No comments found.")
+//                    return
+//                }
+//                
+//                DispatchQueue.main.async {
+//                    self.comments = snapshot.documents.compactMap { doc in
+//                        do {
+//                            return try doc.data(as: Comments.self)
+//                        } catch {
+//                            print("❌ Error decoding comment: \(error.localizedDescription)")
+//                            return nil
+//                        }
+//                    }
+//                    print("✅ Successfully fetched \(self.comments.count) comments.")
+//                }
+//            }
+//    }
+    
     func fetchComments() {
         db.collection("Comments")
-            .whereField("postId", isEqualTo: self.postId) // ✅ Explicitly use 'self'
+            .whereField("postId", isEqualTo: self.postId)
             .order(by: "createdAt", descending: true)
             .addSnapshotListener { [weak self] snapshot, error in
-                guard let self = self else { return } // ✅ Prevent retain cycles
-                
+                guard let self = self else { return }
+
                 if let error = error {
                     print("❌ Error fetching comments: \(error.localizedDescription)")
                     return
                 }
-                
-                guard let snapshot = snapshot, !snapshot.documents.isEmpty else {
-                    DispatchQueue.main.async {
-                        self.comments = [] // ✅ Clear comments if no data
-                    }
+
+                guard let snapshot = snapshot else {
+                    DispatchQueue.main.async { self.comments = [] }
                     print("⚠️ No comments found.")
                     return
                 }
-                
-                DispatchQueue.main.async {
-                    self.comments = snapshot.documents.compactMap { doc in
-                        do {
-                            return try doc.data(as: Comments.self)
-                        } catch {
-                            print("❌ Error decoding comment: \(error.localizedDescription)")
-                            return nil
+
+                let dispatchGroup = DispatchGroup()
+                var fetchedComments: [Comments] = []
+
+                for document in snapshot.documents {
+                    do {
+                        var comment = try document.data(as: Comments.self)
+                        dispatchGroup.enter()
+                        
+                        // Fetch user info
+                        self.db.collection("Users").document(comment.userId).getDocument { userDoc, error in
+                            if let user = try? userDoc?.data(as: User.self) {
+                                comment.user = user
+                            }
+                            fetchedComments.append(comment)
+                            dispatchGroup.leave()
                         }
+                    } catch {
+                        print("❌ Error decoding comment: \(error.localizedDescription)")
                     }
+                }
+
+                dispatchGroup.notify(queue: .main) {
+                    self.comments = fetchedComments.sorted { $0.createdAt > $1.createdAt }
                     print("✅ Successfully fetched \(self.comments.count) comments.")
                 }
             }
     }
+
+    
     
     func addComment(content: String) {
         guard let userId = Auth.auth().currentUser?.uid else { return }
@@ -77,8 +125,7 @@ class CommentViewModel: ObservableObject {
                 id: commentId,
                 postId: self.postId, // ✅ Reference the correct post
                 userId: userData.id,
-                fullName: userData.fullName,
-                profileImageURL: userData.profileImageURL,
+                user: nil,
                 content: content,
                 createdAt: Date().timeIntervalSince1970
             )

@@ -17,7 +17,7 @@ struct CommentCell: View {
         HStack(alignment: .top, spacing: 10) {
             // Profile Image
            
-                if let imageUrl = comment.profileImageURL, let url = URL(string: imageUrl) {
+            if let imageUrl = comment.user?.profileImageURL, let url = URL(string: imageUrl) {
                     WebImage(url: url)
                         .resizable()
                         .indicator(.activity)
@@ -36,7 +36,7 @@ struct CommentCell: View {
             // Comment Content
             VStack(alignment: .leading, spacing: 5) {
                 HStack{
-                    Text(comment.fullName)
+                    Text(comment.user?.fullName ?? "")
                         .font(.system(size: 14, weight: .bold))
                     Text("·\(timeFormatter(from: comment.createdAt))")
                         .font(.footnote)
@@ -82,20 +82,6 @@ struct CommentCell: View {
     }
 }
 
-#Preview {
-    CommentCell(
-        comment: Comments(
-            id: "1",
-            postId: "101",
-            userId: "user123",
-            fullName: "John Doe",
-            profileImageURL: "person.circle",
-            content: "This is a test comment!",
-            createdAt: Date().timeIntervalSince1970
-        ),
-        viewModel: CommentViewModel(postId: "101") // ✅ Correctly passing a ViewModel instance
-    )
-}
 
 
 

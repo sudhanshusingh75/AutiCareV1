@@ -104,8 +104,7 @@ class AddNewPostViewModel: ObservableObject {
             content: postContent,
             imageURL: imageUrls,
             createdAt: Date().timeIntervalSince1970,
-            fullName: user.fullName,
-            profileImageURL: user.profileImageURL,
+            user: nil,
             likesCount: 0,
             likedBy: [],
             commentsCount: 0, tag: selectedTag.isEmpty ? [] : [selectedTag]

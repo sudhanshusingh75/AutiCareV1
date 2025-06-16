@@ -13,7 +13,7 @@ struct CommentSectionView: View {
     @StateObject var viewModel: CommentViewModel
     @State private var newComment = ""
     @Environment(\.dismiss) var dismiss
-    let currentUserProfileImageURL: String?
+    @EnvironmentObject var currentUserVm: AuthViewModel
     var body: some View {
         VStack {
             // Title
@@ -56,7 +56,7 @@ struct CommentSectionView: View {
             Divider()
             HStack(spacing: 10) {
                             // Profile Image
-                if let url = URL(string: currentUserProfileImageURL ?? "") {
+                if let url = URL(string: currentUserVm.currentUser?.profileImageURL ?? "") {
                                 WebImage(url: url)
                                     .resizable()
                                     .scaledToFill()

@@ -8,18 +8,19 @@
 import Foundation
 
 struct Posts:Codable,Identifiable{
-    let id:String
+     let id:String
     let userId:String
     let content:String
     let imageURL:[String]
     let createdAt:TimeInterval
-    let fullName:String
-    let profileImageURL:String?
+//    let fullName:String
+//    let profileImageURL:String?
+    var user:User?
     var likesCount:Int
     var likedBy: [String]
     var commentsCount: Int
     var tag:[String]
-    
+
     var formattedLikes: String {
         formatNumber(likesCount)
     }
@@ -38,7 +39,7 @@ struct Posts:Codable,Identifiable{
     
     var initials: String {
         let formatter = PersonNameComponentsFormatter()
-        if let components = formatter.personNameComponents(from: fullName) {
+        if let components = formatter.personNameComponents(from: user?.fullName ?? "") {
             formatter.style = .abbreviated
             return formatter.string(from: components)
         }

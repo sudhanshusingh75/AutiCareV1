@@ -18,8 +18,8 @@ struct User: Identifiable, Codable {
     var dob:Date
     var gender:String
     
-    var followers: [String]? = [] // Default empty array
-    var followings: [String]? = [] // Default empty array
+    var followersCount: Int = 0
+    var followingCount: Int = 0
     var postsCount: Int = 0 // Default zero
     var bio:String?
     

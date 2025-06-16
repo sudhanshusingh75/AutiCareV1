@@ -11,7 +11,7 @@ import PhotosUI
 struct AddNewPostView: View {
     @State private var selectedTag = ""
     let columns = [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())]
-    @Binding var posts: [Posts]
+//    @Binding var posts: [Posts]
     var onPostAdded: (() -> Void)?
     @StateObject private var viewModel = AddNewPostViewModel()
     @StateObject private var profileVM = ProfileViewModel()

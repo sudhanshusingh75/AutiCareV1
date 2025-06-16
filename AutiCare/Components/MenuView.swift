@@ -1,43 +1,45 @@
-//
-//  MenuView.swift
-//  Auticare
-//
-//  Created by Sudhanshu Singh Rajput on 14/02/25.
-//
-
 import SwiftUI
+import FirebaseAuth
 
 struct MenuView: View {
-    @ObservedObject var viewModel: FeedViewModel
+    @ObservedObject var feedViewModel: FeedViewModel
+    @ObservedObject var profileViewModel: OtherUserProfileViewModel
     let post: Posts
     @Environment(\.dismiss) var dismiss
+
+    private var currentUserId: String? {
+        Auth.auth().currentUser?.uid
+    }
     
     var body: some View {
         VStack(alignment:.leading,spacing: 12) {
             
-            // Connection Toggle
-            if post.userId != viewModel.userId {
+            // Follow/Unfollow for Other Users
+            if post.userId != currentUserId {
                 Button {
-                    viewModel.toggleFollow(userId: post.userId)
+                    Task {
+                        await profileViewModel.toggleFollow(for: post.userId)
+                    }
                 } label: {
+                    let currentlyFollowing = profileViewModel.isFollowing ?? false
+                    
                     HStack {
-                        Image(systemName: viewModel.connections[post.userId] ?? false ? "person.fill.xmark" : "person.fill.checkmark")
-                        Text(viewModel.connections[post.userId] ?? false ? "Unfollow" : "Follow")
+                        Image(systemName: currentlyFollowing ? "person.fill.xmark" : "person.fill.checkmark")
+                        Text(currentlyFollowing ? "Unfollow" : "Follow")
                     }
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(viewModel.connections[post.userId] ?? false ? Color.red.opacity(0.2) : Color.blue.opacity(0.2))
-                    .foregroundStyle(viewModel.connections[post.userId] ?? false ? Color.red : Color.blue)
+                    .background(currentlyFollowing ? Color.red.opacity(0.2) : Color.blue.opacity(0.2))
+                    .foregroundStyle(currentlyFollowing ? Color.red : Color.blue)
                     .clipShape(RoundedRectangle(cornerRadius: 10))
                 }
             }
             
             // Delete Post (Only for Owner)
-            if post.userId == viewModel.userId {
-                
+            if post.userId == currentUserId {
                 Button {
                     Task {
-                        await viewModel.deletePost(post: post)
+                        await feedViewModel.deletePost(post: post)
                     }
                 } label: {
                     HStack {
@@ -53,16 +55,13 @@ struct MenuView: View {
             }
             
             // Report Post (Only for Others)
-            if post.userId != viewModel.userId {
+            if post.userId != currentUserId {
                 Divider()
-                
                 Button {
-                    // Report functionality here
-                    Task{
-                        try await viewModel.reportPost(postId: post.id)
+                    Task {
+                        try await feedViewModel.reportPost(postId: post.id)
                         dismiss()
                     }
-                    
                 } label: {
                     HStack {
                         Image(systemName: "exclamationmark.triangle.fill")
@@ -75,7 +74,9 @@ struct MenuView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 10))
                 }
             }
+
             Divider()
+
 //            Button {
 //                sharePost()
 //            } label: {
@@ -88,29 +89,7 @@ struct MenuView: View {
 //            .clipShape(RoundedRectangle(cornerRadius: 10))
 
             Spacer()
-        }.padding()
+        }
+        .padding()
     }
-    
-    
-//    private func sharePost() {
-//        let textToShare = post.content
-//        let imageUrl = post.imageURL
-//        
-//        var itemsToShare: [Any] = [textToShare]
-//        
-//        if let imageUrl = imageUrl.first, let url = URL(string: imageUrl) {
-//            itemsToShare.append(url)
-//        }
-//        
-//        let activityVC = UIActivityViewController(activityItems: itemsToShare, applicationActivities: nil)
-//        
-//        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-//           let rootViewController = windowScene.windows.first?.rootViewController {
-//            rootViewController.present(activityVC, animated: true, completion: nil)
-//        }
-//    }
 }
-
-
-
-

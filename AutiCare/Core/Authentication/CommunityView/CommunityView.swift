@@ -15,13 +15,23 @@ struct CommunityView: View {
         NavigationStack {
             VStack {
                     FeedView()
+                    .padding(.vertical)
             }
             .navigationTitle("Community")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                
                 ToolbarItem(placement: .topBarTrailing) {
                     NavigationLink(destination: SearchView()) {
                         Image(systemName: "magnifyingglass")
+                            .foregroundStyle(Color.init(red: 0, green: 0.387, blue: 0.5))
+                    }
+                }
+                ToolbarItem(placement: .topBarTrailing){
+                    NavigationLink {
+                        AddNewPostView()
+                    } label: {
+                        Image(systemName: "plus.app")
                             .foregroundStyle(Color.init(red: 0, green: 0.387, blue: 0.5))
                     }
                 }

@@ -11,10 +11,13 @@ import FirebaseAuth
 
 struct FeedCell: View {
     @ObservedObject var viewModel:FeedViewModel
+    @StateObject private var otherProfileViewModel = OtherUserProfileViewModel()
     @State private var isLinked = false
     @State private var showFullDescription = false
     @State private var showCommentView = false
     @State private var showMenuView = false
+    @State private var showRemovePrompt = false
+    @State private var removeReason = ""
     let post:Posts
     let currentUser = Auth.auth().currentUser
     let currentUserProfileImage:String?
@@ -25,7 +28,7 @@ struct FeedCell: View {
                //Header Section of the Feed
                 if post.userId == currentUser?.uid{
                     NavigationLink(destination: ProfileView()){
-                        if let urlString = post.profileImageURL,!urlString.isEmpty,let url = URL(string: urlString) {
+                        if let urlString = post.user?.profileImageURL,!urlString.isEmpty,let url = URL(string: urlString) {
                             WebImage(url: url)
                                 .resizable()
                                 .frame(width: 50, height: 50)
@@ -41,7 +44,7 @@ struct FeedCell: View {
                         }
 
                         VStack(alignment:.leading){
-                            Text(post.fullName)
+                            Text(post.user?.fullName ?? "")
                                 .font(.callout)
                                 .foregroundStyle(Color.black)
                             Text(viewModel.timeFormatter(from: post.createdAt))
@@ -52,7 +55,7 @@ struct FeedCell: View {
                 }
                 else{
                     NavigationLink(destination: OtherUserProfileView(userId: post.userId)){
-                        if let urlString = post.profileImageURL,!urlString.isEmpty,let url = URL(string: urlString){
+                        if let urlString = post.user?.profileImageURL,!urlString.isEmpty,let url = URL(string: urlString){
                             WebImage(url: url)
                                 .resizable()
                                 .frame(width: 50,height: 50)
@@ -69,7 +72,7 @@ struct FeedCell: View {
                         }
                         
                         VStack(alignment:.leading){
-                            Text(post.fullName)
+                            Text(post.user?.fullName ?? "")
                                 .font(.callout)
                                 .foregroundStyle(Color.black)
                             Text(viewModel.timeFormatter(from: post.createdAt))
@@ -90,18 +93,25 @@ struct FeedCell: View {
                         }
                        
                     }.sheet(isPresented: $showMenuView) {
-                        MenuView(viewModel: viewModel, post: post)
+                        MenuView(feedViewModel: viewModel, profileViewModel: otherProfileViewModel, post: post)
                             .presentationDetents([.fraction(0.4)])
                             .presentationDragIndicator(.visible)
-                        .onAppear {
-                            viewModel.checkifConnected(userId: post.userId)
-                        }
+                            .onAppear {
+                                otherProfileViewModel.observeFollowStatus(targetUserId: post.userId)
+                            }
                     }
-                    Button {
-                        viewModel.removeFromFeed(postId: post.id)
-                    } label: {
-                        Image(systemName: "xmark")
-                            .foregroundStyle(Color.init(red: 0, green: 0.387, blue: 0.5))
+                    if post.userId != currentUser?.uid {
+                        Button {
+                            showRemovePrompt = true
+                        } label: {
+                            Image(systemName: "xmark")
+                                .foregroundStyle(Color.init(red: 0, green: 0.387, blue: 0.5))
+                        }
+                        .sheet(isPresented: $showRemovePrompt) {
+                            RemovePostReasonView { reason in
+                                viewModel.removeFromFeed(postId: post.id, reason: reason)
+                            }
+                        }
                     }
                 }
 
@@ -114,17 +124,19 @@ struct FeedCell: View {
                             Text(post.content)
                                 .lineLimit(showFullDescription ? nil : 1)
                                 .font(.callout)
+                                .padding(.vertical,4)
                             Button {
                                 withAnimation {
                                     showFullDescription.toggle()
                                 }
                             } label: {
-                                Text(showFullDescription ? " Less...":"More...")
-                                    .font(.caption)
-                                    .fontWeight(.semibold)
-                                    .foregroundStyle(Color.init(red: 0, green: 0.387, blue: 0.5))
-                                    .padding(.vertical,4)
-                                
+                                if post.content.count >= 50{
+                                    Text(showFullDescription ? " Less...":"More...")
+                                        .font(.caption)
+                                        .fontWeight(.semibold)
+                                        .foregroundStyle(Color.init(red: 0, green: 0.387, blue: 0.5))
+                                        .padding(.vertical,4)
+                                }
                             }
                         }
                         else{
@@ -191,7 +203,7 @@ struct FeedCell: View {
                     Text("\(post.commentsCount)")
                             .foregroundStyle(Color.gray)
                 }.sheet(isPresented: $showCommentView) {
-                    CommentSectionView(viewModel: CommentViewModel(postId: post.id), currentUserProfileImageURL: currentUserProfileImage)
+                    CommentSectionView(viewModel: CommentViewModel(postId: post.id))
                         .presentationDragIndicator(.visible)
                 }
                     Button {

@@ -4,7 +4,7 @@ import SDWebImageSwiftUI
 struct ProfileView: View {
     @StateObject private var profileVM = ProfileViewModel()
     @EnvironmentObject var authVM: AuthViewModel
-    @State private var posts: [Posts] = [] // This will hold the user's posts
+    //    @State private var posts: [Posts] = [] // This will hold the user's posts
     private let gridItems: [GridItem] = [
         .init(.flexible(), spacing: 1),
         .init(.flexible(), spacing: 1),
@@ -45,10 +45,10 @@ struct ProfileView: View {
                             HStack(spacing: 8) {
                                 UserStatView(value: user.postsCount, title: "Posts")
                                 NavigationLink(destination: FollowersView()) {
-                                    UserStatView(value: user.followers?.count ?? 0, title: "Followers")
+                                    UserStatView(value: user.followersCount, title: "Followers")
                                 }
                                 NavigationLink(destination: FollowingsView()) {
-                                    UserStatView(value: user.followings?.count ?? 0, title: "Following")
+                                    UserStatView(value: user.followingCount, title: "Following")
                                 }
                             }
                         }
@@ -79,7 +79,7 @@ struct ProfileView: View {
                             Text("Edit Profile")
                                 .font(.subheadline)
                                 .fontWeight(.semibold)
-//                                .foregroundColor(.black)
+                            //                                .foregroundColor(.black)
                                 .foregroundStyle(Color.init(red: 0, green: 0.387, blue: 0.5))
                                 .frame(width: 360, height: 32)
                                 .overlay(RoundedRectangle(cornerRadius: 6).stroke(Color.gray, lineWidth: 1))
@@ -127,19 +127,19 @@ struct ProfileView: View {
                 .navigationTitle("Profile")
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
-                    ToolbarItem{
-                        NavigationLink {
-                            AddNewPostView(posts: $posts)
-                            {
-                                if let userId = authVM.currentUser?.id{
-                                    profileVM.fetchMyPosts(userId: userId)
-                                }
-                            }
-                        } label: {
-                            Image(systemName: "plus.app")
-                                .foregroundStyle(Color.init(red: 0, green: 0.387, blue: 0.5))
-                        }
-                    }
+//                    ToolbarItem{
+//                        NavigationLink {
+//                            AddNewPostView
+//                            {
+//                                if let userId = authVM.currentUser?.id{
+//                                    profileVM.fetchMyPosts(userId: userId)
+//                                }
+//                            }
+//                        } label: {
+//                            Image(systemName: "plus.app")
+//                                .foregroundStyle(Color.init(red: 0, green: 0.387, blue: 0.5))
+//                        }
+//                    }
                     ToolbarItem {
                         NavigationLink {
                             SettingsView(profileVM: profileVM)

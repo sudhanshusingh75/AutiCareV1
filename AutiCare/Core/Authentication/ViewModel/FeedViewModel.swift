@@ -17,7 +17,8 @@ class FeedViewModel: ObservableObject,Identifiable {
     private let db = Firestore.firestore()
     @Published var userId:String = (Auth.auth().currentUser?.uid ?? "")
     @Published var isDeleting = false
-    @Published var connections: [String: Bool] = [:]
+
+
     let supabase = SupabaseClient(
         supabaseURL: URL(string: "https://zaaxtksuazyvxntlwmrn.supabase.co")!,
         supabaseKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InphYXh0a3N1YXp5dnhudGx3bXJuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzgzMTk2ODIsImV4cCI6MjA1Mzg5NTY4Mn0.5IBPLi4bdv0e04rWbaqqB9U3YDh23py4ieTijArJA8M"
@@ -27,93 +28,102 @@ class FeedViewModel: ObservableObject,Identifiable {
         fetchAllPosts()
     }
 
-    func fetchAllPosts(){
+    func fetchAllPosts() {
+        guard let userId = Auth.auth().currentUser?.uid else { return }
+
         isLoading = true
-        db.collection("Posts").order(by: "createdAt",descending: true).addSnapshotListener { snapshot, error in
-            if let error = error {
-                print("❌ Error listening for updates: \(error.localizedDescription)")
-                return
-            }
-            guard let snapshot = snapshot else {
-                print("❌ Error fetching posts: \(error!.localizedDescription)")
-                return
-            }
-            let fetchedPosts = snapshot.documents.compactMap { document in
-                try? document.data(as: Posts.self)
-            }
-            DispatchQueue.main.async {
-                self.posts = fetchedPosts
-                self.isLoading = false
-            }
-        }
-    }
-    
-//    func fetchExplorePosts(tags: [String]) {
-//        isLoading = true
-//        var query = db.collection("Posts").order(by: "createdAt", descending: true)
-//
-//        if !tags.isEmpty {
-//            query = query.whereField("tag", arrayContainsAny: tags) // ✅ Only apply filter if tags exist
-//        }
-//
-//        query.addSnapshotListener { snapshot, error in
-//            if let error = error {
-//                print("❌ Error fetching explore posts: \(error.localizedDescription)")
-//                return
-//            }
-//            guard let snapshot = snapshot else { return }
-//
-//            let explorePosts = snapshot.documents.compactMap { document in
-//                try? document.data(as: Posts.self)
-//            }
-//
-//            DispatchQueue.main.async {
-//                self.explorePosts = explorePosts
-//                self.isLoading = false
-//            }
-//        }
-//    }
-    
-//    func fetchFilteredPosts(tag:String){
-//        isLoading = true
-//        db.collection("Posts").whereField("tag", isEqualTo: tag)
-//            .order(by: "createdAt", descending: true)
-//            .getDocuments { snapshot, error in
-//                if let error = error {
-//                    print("Error fetching posts for tag \(tag): \(error.localizedDescription)")
-//                    return
-//                }
-//                guard let documents = snapshot?.documents else { return }
-//                self.posts = documents.compactMap{doc -> Posts? in
-//                    try? doc.data(as: Posts.self)
-//                }
-//            }
-//    }
-    func fetchPosts(forTag tag: String) {
-        isLoading = true
-        db.collection("Posts")
-            .whereField("tag", arrayContains: tag) // 👈 Fetch posts that contain the tag
-            .order(by: "createdAt", descending: true)
-            .addSnapshotListener { snapshot, error in
+        let db = Firestore.firestore()
+
+        // Step 1: Fetch hidden post IDs for current user
+        db.collection("Users").document(userId).collection("hiddenPosts").getDocuments { hiddenSnapshot, error in
+            let hiddenPostIds = hiddenSnapshot?.documents.map { $0.documentID } ?? []
+
+            // Step 2: Listen to Posts collection
+            db.collection("Posts").order(by: "createdAt", descending: true).addSnapshotListener { snapshot, error in
                 if let error = error {
-                    print("❌ Error listening for tag posts: \(error.localizedDescription)")
+                    print("❌ Error listening for updates: \(error.localizedDescription)")
                     return
                 }
+
                 guard let snapshot = snapshot else {
-                    print("❌ Error fetching tag posts: \(error!.localizedDescription)")
+                    print("❌ Error fetching posts: \(error!.localizedDescription)")
                     return
                 }
-                let fetchedPosts = snapshot.documents.compactMap { document in
-                    try? document.data(as: Posts.self)
+
+                let dispatchGroup = DispatchGroup()
+                var fetchedPosts: [Posts] = []
+
+                for document in snapshot.documents {
+                    if var post = try? document.data(as: Posts.self),
+                       !hiddenPostIds.contains(post.id) { // Skip hidden posts
+                        dispatchGroup.enter()
+                        let userRef = db.collection("Users").document(post.userId)
+                        userRef.getDocument { userDoc, error in
+                            if let userData = try? userDoc?.data(as: User.self) {
+                                post.user = userData
+                            }
+                            fetchedPosts.append(post)
+                            dispatchGroup.leave()
+                        }
+                    }
                 }
-                DispatchQueue.main.async {
-                    self.posts = fetchedPosts
+
+                dispatchGroup.notify(queue: .main) {
+                    self.posts = fetchedPosts.sorted(by: { $0.createdAt > $1.createdAt })
                     self.isLoading = false
                 }
             }
+        }
     }
+    func fetchPosts(forTag tag: String) {
+        guard let userId = Auth.auth().currentUser?.uid else { return }
 
+        isLoading = true
 
+        // Step 1: Fetch hidden post IDs
+        db.collection("Users").document(userId).collection("hiddenPosts").getDocuments { hiddenSnapshot, error in
+            let hiddenPostIds = hiddenSnapshot?.documents.map { $0.documentID } ?? []
+
+            // Step 2: Fetch tag-specific posts
+            self.db.collection("Posts")
+                .whereField("tag", arrayContains: tag)
+                .order(by: "createdAt", descending: true)
+                .addSnapshotListener { snapshot, error in
+                    if let error = error {
+                        print("❌ Error listening for tag posts: \(error.localizedDescription)")
+                        return
+                    }
+
+                    guard let snapshot = snapshot else {
+                        print("❌ Error fetching tag posts: \(error!.localizedDescription)")
+                        return
+                    }
+
+                    let dispatchGroup = DispatchGroup()
+                    var fetchedPosts: [Posts] = []
+
+                    for document in snapshot.documents {
+                        if var post = try? document.data(as: Posts.self),
+                           !hiddenPostIds.contains(post.id) { // 🚫 Skip hidden posts
+                            dispatchGroup.enter()
+                            let userRef = self.db.collection("Users").document(post.userId)
+                            userRef.getDocument { userDoc, error in
+                                if let userData = try? userDoc?.data(as: User.self) {
+                                    post.user = userData
+                                }
+                                fetchedPosts.append(post)
+                                dispatchGroup.leave()
+                            }
+                        }
+                    }
+
+                    dispatchGroup.notify(queue: .main) {
+                        self.posts = fetchedPosts.sorted(by: { $0.createdAt > $1.createdAt })
+                        self.isLoading = false
+                    }
+                }
+        }
+    }
 
     func toggleLike(for post: Posts) {
         guard let index = posts.firstIndex(where: { $0.id == post.id }) else { return }
@@ -237,81 +247,47 @@ class FeedViewModel: ObservableObject,Identifiable {
             return "Just now"
         }
     }
-        private func deleteImageFromSupabase(_ imageUrl: String) async throws {
-            guard let url = URL(string: imageUrl) else { return }
-            let path = url.pathComponents.suffix(2).joined(separator: "/") // Extract correct path
-
-            do {
-                try await supabase.storage.from("user-uploads").remove(paths: [path])
-                print("✅ Image deleted from Supabase: \(imageUrl)")
-            } catch {
-                print("❌ Error deleting image from Supabase: \(error.localizedDescription)")
-            }
+    
+    private func deleteImageFromSupabase(_ imageUrl: String) async throws {
+        guard let url = URL(string: imageUrl) else { return }
+        let path = url.pathComponents.suffix(2).joined(separator: "/") // Extract correct path
+        
+        do {
+            try await supabase.storage.from("user-uploads").remove(paths: [path])
+            print("✅ Image deleted from Supabase: \(imageUrl)")
+        } catch {
+            print("❌ Error deleting image from Supabase: \(error.localizedDescription)")
         }
+    }
 
     
     func isLiked(post: Posts) -> Bool {
         return post.likedBy.contains(userId)
     }
-    
 
-    func checkifConnected(userId: String) {
-            guard let currentUserId = Auth.auth().currentUser?.uid else { return }
-            
-            let userRef = Firestore.firestore().collection("Users").document(currentUserId)
-            userRef.getDocument { snapshot, error in
-                guard let data = snapshot?.data(),
-                      let following = data["followings"] as? [String] else { return }
-                
-                DispatchQueue.main.async {
-                    self.connections[userId] = following.contains(userId) // Store connection per user
-                }
-            }
-        }
-    func toggleFollow(userId: String) {
-            guard let currentUserId = Auth.auth().currentUser?.uid else { return }
-            let currentUserRef = Firestore.firestore().collection("Users").document(currentUserId)
-            let targetUserRef = Firestore.firestore().collection("Users").document(userId)
+    func removeFromFeed(postId: String, reason: String) {
+        guard let userId = Auth.auth().currentUser?.uid else { return }
 
-            Firestore.firestore().runTransaction { transaction, errorPointer in
-                let currentUserSnapshot = try? transaction.getDocument(currentUserRef)
-                let targetUserSnapshot = try? transaction.getDocument(targetUserRef)
-
-                guard let currentUserData = currentUserSnapshot?.data(),
-                      let targetUserData = targetUserSnapshot?.data() else { return nil }
-
-                var following = currentUserData["followings"] as? [String] ?? []
-                var followers = targetUserData["followers"] as? [String] ?? []
-
-                let isCurrentlyFollowing = self.connections[userId] ?? false
-
-                if isCurrentlyFollowing {
-                    following.removeAll { $0 == userId }
-                    followers.removeAll { $0 == currentUserId }
-                } else {
-                    following.append(userId)
-                    followers.append(currentUserId)
-                }
-
-                transaction.updateData(["followings": following], forDocument: currentUserRef)
-                transaction.updateData(["followers": followers], forDocument: targetUserRef)
-
-                return nil
-            } completion: { _, error in
-                DispatchQueue.main.async {
-                    self.connections[userId] = !(self.connections[userId] ?? false)
-                    // Update UI for this specific user
-                }
-            }
-        }
-
-
-    func removeFromFeed(postId: String) {
-        DispatchQueue.main.async {
-            self.posts.removeAll { $0.id == postId }
-        }
+        let db = Firestore.firestore()
+        db.collection("Users")
+          .document(userId)
+          .collection("hiddenPosts")
+          .document(postId)
+          .setData([
+              "reason": reason,
+              "timestamp": Timestamp(date: Date())
+          ]) { error in
+              if let error = error {
+                  print("Error: \(error.localizedDescription)")
+              } else {
+                  // Remove from feed list in app
+                  DispatchQueue.main.async {
+                      self.posts.removeAll { $0.id == postId }
+                  }
+              }
+          }
     }
-    
+
     func reportPost(postId: String/*, reason: String*/) async throws {
         guard let userId = Auth.auth().currentUser?.uid else { return }
         let reportId = UUID().uuidString

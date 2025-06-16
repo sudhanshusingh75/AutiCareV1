@@ -14,6 +14,8 @@ class AuthViewModel: ObservableObject {
     @Published var currentUser: User?
     @Published var alertMessage: String = ""
     @Published var showAlert: Bool = false
+    private var listener:ListenerRegistration?
+    private var db = Firestore.firestore()
     
     private let supabase: SupabaseClient
     private let storage: SupabaseStorageClient
@@ -34,6 +36,9 @@ class AuthViewModel: ObservableObject {
             await fetchUser()
             
         }
+    }
+    deinit{
+        listener?.remove()
     }
     
     func signIn(withEmail email: String, password: String) async throws {
@@ -77,8 +82,8 @@ class AuthViewModel: ObservableObject {
                 location: "",
                 dob: dateOfBirth,
                 gender: gender,
-                followers: [],
-                followings: [],
+                followersCount: 0,
+                followingCount: 0,
                 postsCount: 0,
                 bio: ""
             )
@@ -86,7 +91,7 @@ class AuthViewModel: ObservableObject {
             let encodedUser = try Firestore.Encoder().encode(newUser)
             
             // Save user data in Firestore
-            try await Firestore.firestore().collection("Users").document(newUser.id).setData(encodedUser)
+            try await db.collection("Users").document(newUser.id).setData(encodedUser)
             
             // Fetch user data after creating the account
             await fetchUser()
@@ -98,7 +103,7 @@ class AuthViewModel: ObservableObject {
 
     func checkUsernameUniqueness(_ username: String) async -> Bool {
             do {
-                let snapshot = try await Firestore.firestore().collection("Users")
+                let snapshot = try await db.collection("Users")
                     .whereField("userName", isEqualTo: username)
                     .getDocuments()
                 
@@ -125,42 +130,42 @@ class AuthViewModel: ObservableObject {
             // Step 1: Delete user data from Firestore
             let userId = user.uid
             
-            let followersQuery = Firestore.firestore().collection("Users").whereField("followers", arrayContains: userId)
+            let followersQuery = db.collection("Users").whereField("followers", arrayContains: userId)
                     let followersSnapshot = try await followersQuery.getDocuments()
 
                     for document in followersSnapshot.documents {
                         let userDocId = document.documentID
-                        try await Firestore.firestore().collection("Users").document(userDocId).updateData([
+                        try await db.collection("Users").document(userDocId).updateData([
                             "followers": FieldValue.arrayRemove([userId])
                         ])
                         print("✅ Removed user from \(userDocId)'s followers list")
                     }
 
                     // Step 2: Remove all "following" references
-                    let followingQuery = Firestore.firestore().collection("Users").whereField("followings", arrayContains: userId)
+                    let followingQuery = db.collection("Users").whereField("followings", arrayContains: userId)
                     let followingSnapshot = try await followingQuery.getDocuments()
 
                     for document in followingSnapshot.documents {
                         let userDocId = document.documentID
-                        try await Firestore.firestore().collection("Users").document(userDocId).updateData([
+                        try await db.collection("Users").document(userDocId).updateData([
                             "following": FieldValue.arrayRemove([userId])
                         ])
                         print("✅ Removed user from \(userDocId)'s following list")
                     }
             
-            let postQuery = Firestore.firestore().collection("Posts").whereField("userId",isEqualTo: userId)
+            let postQuery = db.collection("Posts").whereField("userId",isEqualTo: userId)
             let postDocument = try await postQuery.getDocuments()
             
             for document in postDocument.documents {
                         let postId = document.documentID
-                let commentQuery = Firestore.firestore().collection("Comments").whereField("postId", isEqualTo: postId)
+                let commentQuery = db.collection("Comments").whereField("postId", isEqualTo: postId)
                 let commentDocument = try await commentQuery.getDocuments()
                 for document in commentDocument.documents{
                     let commentId = document.documentID
-                    try await Firestore.firestore().collection("Comments").document(commentId).delete()
+                    try await db.collection("Comments").document(commentId).delete()
                     print("✅ Deleted Comment: \(commentId)")
                 }
-                try await Firestore.firestore().collection("Posts").document(postId).delete()
+                try await db.collection("Posts").document(postId).delete()
                         print("✅ Deleted post: \(postId)")
 
                         // Optional: Delete associated images from Supabase Storage
@@ -173,7 +178,7 @@ class AuthViewModel: ObservableObject {
                         }
                     }
             
-            try await Firestore.firestore().collection("Users").document(userId).delete()
+            try await db.collection("Users").document(userId).delete()
             print("✅ User data deleted from Firestore")
             
             // Step 2: Delete profile image from Supabase Storage
@@ -200,16 +205,29 @@ class AuthViewModel: ObservableObject {
 
 
     func fetchUser() async {
-        guard let uid = Auth.auth().currentUser?.uid else { return }
+        guard let uid = Auth.auth().currentUser?.uid else {
+            self.currentUser = nil
+            return
+        }
         
-        do {
-            let snapshot = try await Firestore.firestore().collection("Users").document(uid).getDocument()
+        listener = db.collection("Users").document(uid).addSnapshotListener { [weak self] documentSnapshot, error in
+            guard let self = self else { return }
             
-            // Decode the data into a User object
-            self.currentUser = try snapshot.data(as: User.self)
-            
-        } catch {
-            print("DEBUG: Failed to fetch user data with error \(error.localizedDescription)")
+            if let error = error {
+                print("❌ Error fetching current user: \(error.localizedDescription)")
+                return
+            }
+            guard let snapshot = documentSnapshot else {
+                self.currentUser = nil
+                return
+            }
+            do{
+                self.currentUser = try snapshot.data(as: User.self)
+            }
+            catch {
+                print("❌ Error decoding user data: \(error.localizedDescription)")
+                self.currentUser = nil
+            }
         }
     }
 
