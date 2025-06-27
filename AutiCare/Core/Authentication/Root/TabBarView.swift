@@ -11,24 +11,29 @@ struct TabBarView: View {
     
     var body: some View {
         TabView{
-            CommunityView()
-            .tabItem {
-                Label("Community", systemImage: "person.3.fill")
-            }
-            LearningPageView()
-                .tabItem {
-                    Image(systemName: "book.fill")
-                    Text("Learning")
-                }
-            ProgressTabView()
-                            .tabItem {
-                                Label("Progress", systemImage: "chart.bar")
-                            }
-            ProfileView()
-            .tabItem {
-                Label("Profile", systemImage: "person.circle")
+            Group{
+                CommunityView()
+                    .tabItem {
+                        Label("Community", systemImage: "person.3.fill")
+                    }
+                
+                LearningTabView()
+                    .tabItem {
+                        Label("Learning", systemImage:"book.fill")
+                    }
+                
+                ProgressTab()
+                    .tabItem {
+                        Label("Progress", systemImage: "chart.bar")
+                    }
+                
+                ProfileView()
+                    .tabItem {
+                        Label("Profile", systemImage: "person.circle")
+                    }
             }
         }
+        .tint(Color.init(red: 0, green: 0.387, blue: 0.5))
     }
 }
 

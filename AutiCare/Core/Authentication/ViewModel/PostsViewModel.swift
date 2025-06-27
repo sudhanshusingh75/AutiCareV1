@@ -36,7 +36,7 @@ class PostsViewModel:ObservableObject{
                 return
             }
             var fetchedPosts:[Posts] = []
-            var disPatchGroup = DispatchGroup()
+            let disPatchGroup = DispatchGroup()
             for doc in documents{
                 do{
                     var post = try doc.data(as: Posts.self)

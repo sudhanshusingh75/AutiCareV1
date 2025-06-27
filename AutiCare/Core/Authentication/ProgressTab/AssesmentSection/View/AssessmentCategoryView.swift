@@ -5,6 +5,7 @@
 //  Created by Sudhanshu Singh Rajput on 26/06/25.
 //
 
+
 //  AssessmentCategoryView.swift
 //  Auticare
 
@@ -12,33 +13,22 @@ import SwiftUI
 
 struct AssessmentCategoryView: View {
     @ObservedObject var viewModel: AssessmentViewModel
-    let categoryTitle: String
     let categoryIndex: Int
     let totalCategories: Int
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            HStack {
-                Button(action: { /* Go Back */ }) {
-                    Image(systemName: "chevron.left")
-                        .font(.title2)
-                        .foregroundColor(.black)
-                }
-                Spacer()
-                Text(categoryTitle)
-                    .font(.title2.bold())
-                    .foregroundColor(.black)
-                Spacer()
-                Spacer() // balance layout
-            }
-            .padding(.top)
+        VStack(alignment: .center, spacing: 16) {
+            Text(viewModel.currentCategory.category.rawValue)
+                .font(.title2.bold())
+                .foregroundColor(.black)
+                .padding(.top)
 
-            Text("Category \(categoryIndex) of \(totalCategories)")
+            Text("Category \(categoryIndex + 1) of \(totalCategories)")
                 .font(.subheadline)
                 .foregroundColor(.gray)
 
-            ProgressView(value: Double(categoryIndex), total: Double(totalCategories))
-                .progressViewStyle(LinearProgressViewStyle(tint: Color.blue))
+            ProgressView(value: Double(categoryIndex + 1), total: Double(totalCategories))
+                .progressViewStyle(LinearProgressViewStyle(tint: Color(red: 0, green: 0.387, blue: 0.5)))
                 .padding(.bottom, 16)
 
             ScrollView {
@@ -51,40 +41,52 @@ struct AssessmentCategoryView: View {
 
                             Text(viewModel.labelForScore(questionID: question.id))
                                 .font(.subheadline)
-                                .foregroundColor(.blue)
+                                .foregroundColor(Color(red: 0, green: 0.387, blue: 0.5))
 
-                            Slider(value: Binding(
+                            let sliderBinding = Binding<Double>(
                                 get: {
-                                    Double(viewModel.selectedAnswers[question.id] ?? 1) * 20.0
+                                    Double(viewModel.getSelectedScore(for: question.id)) * 20.0
                                 },
                                 set: { newValue in
                                     let normalized = Int(round(newValue / 20.0))
                                     viewModel.selectOption(questionID: question.id, score: normalized)
                                 }
-                            ), in: 20...100, step: 20)
+                            )
+
+                            Slider(value: sliderBinding, in: 20...100, step: 20)
                         }
+                        .padding()
                     }
                 }
             }
 
             Button(action: {
-                viewModel.goToNextCategory()
+                if viewModel.allQuestionsAnsweredInCurrentCategory() {
+                    viewModel.goToNextCategory()
+                    if viewModel.isLastCategory{
+                        
+                    }
+                }
             }) {
                 Text("Next Category")
                     .font(.headline)
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(Color.blue)
+                    .background(viewModel.allQuestionsAnsweredInCurrentCategory() ? Color(red: 0, green: 0.387, blue: 0.5) : Color.gray)
                     .cornerRadius(16)
             }
+            .disabled(!viewModel.allQuestionsAnsweredInCurrentCategory())
             .padding(.top, 24)
         }
         .padding()
     }
 }
 
-
 #Preview {
-    AssessmentCategoryView()
+    AssessmentCategoryView(
+        viewModel: AssessmentViewModel(),
+        categoryIndex: 0,
+        totalCategories: 6
+    )
 }

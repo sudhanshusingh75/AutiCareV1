@@ -6,3 +6,9 @@
 //
 
 import Foundation
+
+struct NumberMatchItem: Identifiable {
+    let id = UUID()
+    let number: Int
+    let imageName: String
+}

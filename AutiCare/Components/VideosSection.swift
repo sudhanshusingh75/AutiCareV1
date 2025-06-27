@@ -66,7 +66,7 @@ extension VideosSection {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 15) {
                 ForEach(viewModel.videos) { video in
-                    NavigationLink(destination: VideoPlayerView(videoURL: video.url)) {
+                    NavigationLink(destination: VideoSectionVideoPlayer(video: video)) {
                         videoCard(video: video)
                     }
                 }

@@ -10,8 +10,21 @@ import SDWebImageSwiftUI
 
 struct ResultSectionView: View {
     @State private var results: [AssessmentResult] = [
-        AssessmentResult(id: UUID(), name: "Riya Sharma", score: 82, dateTaken: Date(), imageURL: nil),
-        AssessmentResult(id: UUID(), name: "Arjun Mehta", score: 67, dateTaken: Date().addingTimeInterval(-86400), imageURL:"profilePic")
+        AssessmentResult(
+            id: UUID(),
+            name: "Riya Sharma",
+            score: 82,
+            dateTaken: Date(),
+            imageURL: nil,
+            categoryScores: [
+                CategoryPerformance(name: "Social Relationship & Responsiveness", score: 85, trend: 0.04, weeklyData: [60, 70, 75, 80]),
+                CategoryPerformance(name: "Emotional Responsiveness", score: 78, trend: -0.03, weeklyData: [70, 72, 68, 65]),
+                CategoryPerformance(name: "Speech & Communication", score: 82, trend: 0.02, weeklyData: [60, 70, 80, 85]),
+                CategoryPerformance(name: "Behavior Patterns", score: 76, trend: 0.01, weeklyData: [50, 60, 70, 75]),
+                CategoryPerformance(name: "Sensory Aspects", score: 79, trend: -0.02, weeklyData: [60, 62, 61, 58]),
+                CategoryPerformance(name: "Cognitive Components", score: 83, trend: 0.03, weeklyData: [70, 75, 80, 85])
+            ]
+        )
     ]
     var body: some View {
         NavigationStack {

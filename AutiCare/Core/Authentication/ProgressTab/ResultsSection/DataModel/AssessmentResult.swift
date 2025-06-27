@@ -6,3 +6,19 @@
 //
 
 import Foundation
+struct AssessmentResult: Identifiable {
+    let id: UUID
+    let name: String
+    let score: Int
+    let dateTaken: Date
+    let imageURL: String?
+    let categoryScores: [CategoryPerformance]
+}
+
+struct CategoryPerformance: Identifiable {
+    let id = UUID()
+    let name: String
+    let score: Int
+    let trend: Double
+    let weeklyData: [Double]
+}

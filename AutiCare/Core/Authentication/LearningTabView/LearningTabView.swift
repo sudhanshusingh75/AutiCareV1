@@ -11,18 +11,8 @@ struct LearningTabView: View {
     var body: some View {
         NavigationStack{
             ScrollView{
-                SectionView(title: "Games", description: "Hello There", item:  [Items(name: "Color Matching", image: "shapeQuiz"),
-                    Items(name: "Color Matching", image: "shapeQuiz"),
-                    Items(name: "Color Matching", image: "shapeQuiz"),
-                    Items(name: "Color Matching", image: "shapeQuiz")])
-                SectionView(title: "Videos", description: "Hello There", item:  [Items(name: "Color Matching", image: "shapeQuiz"),
-                    Items(name: "Hello World", image: "shapeQuiz"),
-                    Items(name: "Color Matching", image: "shapeQuiz"),
-                    Items(name: "Color Matching", image: "shapeQuiz")])
-                SectionView(title: "WorkSheets", description: "Hello There", item:  [Items(name: "Color Matching", image: "shapeQuiz"),
-                    Items(name: "Color Matching", image: "shapeQuiz"),
-                    Items(name: "Color Matching", image: "shapeQuiz"),
-                    Items(name: "Color Matching", image: "shapeQuiz")])
+                GameCategoryListView()
+                VideoSectionView()
             }
             .navigationTitle("Learning")
             .navigationBarTitleDisplayMode(.inline)
