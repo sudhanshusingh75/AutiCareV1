@@ -6,3 +6,9 @@
 //
 
 import Foundation
+
+struct GameItem:Identifiable{
+    let id = UUID()
+    let title:String
+    let imageName:String
+}

@@ -51,18 +51,18 @@ struct SettingsView: View {
                 }
                 
                 HStack {
-                    Button(action: {
-                        Task {
-                            await authVM.deleteAccount()
-                        }
-                    }) {
+                    NavigationLink {
+                        DeleteAccountView()
+                    } label: {
                         HStack(spacing: 20){
                             Image(systemName: "trash")
                                 .foregroundStyle(Color.red)
                             Text("Delete Account")
                                 .foregroundColor(.red)
                         }
+
                     }
+
                 }
             }
         }

@@ -13,21 +13,22 @@ struct VideoSectionView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            HStack {
+//            HStack {
                 Text("Videos")
                     .font(.largeTitle.bold())
-                    .foregroundStyle(.white)
-                Spacer()
-                NavigationLink(destination: Text("Hello World")) {
-                    Text("See All")
-                        .font(.subheadline)
-                        .foregroundColor(.white)
-                }
-            }
-            .padding()
-            .background(Color(red: 0, green: 0.387, blue: 0.5))
-            .cornerRadius(20)
-            .padding(.horizontal)
+                    .padding()
+//                    .foregroundStyle(.white)
+//                Spacer()
+//                NavigationLink(destination: Text("Hello World")) {
+//                    Text("See All")
+//                        .font(.subheadline)
+//                        .foregroundColor(.white)
+//                }
+//            }
+//            .padding()
+//            .background(Color(red: 0, green: 0.387, blue: 0.5))
+//            .cornerRadius(20)
+//            .padding(.horizontal)
             
             if viewModel.videos.isEmpty {
                 ProgressView("Loading videos...")
@@ -40,23 +41,23 @@ struct VideoSectionView: View {
             } else {
                 let total = viewModel.videos.count
                 ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 16) {
+                    HStack{
                         ForEach(viewModel.videos.prefix(total)) { video in
                             NavigationLink(destination:VideoSectionVideoPlayer(video: video)) {
-                                VStack{
+                                HStack(spacing:16){
                                     Image(systemName: "play.rectangle.fill")
                                         .resizable()
                                         .scaledToFill()
-                                        .frame(width: 80, height: 80)
+                                        .frame(width: 30, height: 30)
                                         .clipShape(Circle())
                                         .foregroundStyle(Color(red: 0, green: 0.387, blue: 0.5))
                                         
                                     Text(video.name)
                                         .font(.headline)
                                         .foregroundStyle(Color(red: 0, green: 0.387, blue: 0.5))
-                                        .multilineTextAlignment(.center)
+                                        .multilineTextAlignment(.leading)
                                 }
-                                .frame(width: 150,height: 150)
+                                .frame(width: 150,height: 100)
                                 .padding()
                                 .background(Color(red: 0, green: 0.387, blue: 0.5).opacity(0.1))
                                 .cornerRadius(16)

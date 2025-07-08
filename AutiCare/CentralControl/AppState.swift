@@ -6,3 +6,10 @@
 //
 
 import Foundation
+enum AppState {
+    case launching
+    case onboarding
+    case login
+    case profileSetup
+    case home
+}

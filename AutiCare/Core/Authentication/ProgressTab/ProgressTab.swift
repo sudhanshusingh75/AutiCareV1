@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct ProgressTab: View {
+    @StateObject private var navManager = NavigationManager()
     var body: some View {
         NavigationStack{
             ScrollView{
@@ -16,6 +17,7 @@ struct ProgressTab: View {
             }
             .navigationTitle("Progress")
             .navigationBarTitleDisplayMode(.inline)
+            .environmentObject(navManager)
         }
     }
 }

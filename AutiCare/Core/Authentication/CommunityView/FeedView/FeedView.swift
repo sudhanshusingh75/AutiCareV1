@@ -51,7 +51,9 @@ struct FeedView: View {
         ScrollViewReader { proxy in
             ScrollView {
                 if viewModel.posts.isEmpty {
-                    Text("No posts available")
+                    Text("No posts yet — be the first to share something amazing!")
+                        .font(.callout)
+                        .multilineTextAlignment(.leading)
                         .foregroundColor(.gray)
                         .padding()
                 } else {

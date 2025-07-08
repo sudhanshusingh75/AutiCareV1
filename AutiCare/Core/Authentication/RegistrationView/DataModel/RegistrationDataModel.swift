@@ -6,3 +6,12 @@
 //
 
 import Foundation
+
+enum RegistrationStep {
+    case emailEntry
+    case emailVerification
+    case fullName
+    case dobGender
+    case profilePhoto
+    case review
+}

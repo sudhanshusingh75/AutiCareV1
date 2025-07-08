@@ -3,6 +3,7 @@ import Firebase
 import FirebaseAuth
 import FirebaseFirestore
 import Supabase
+import SwiftUI
 
 protocol AuthenticationProtocol {
     var formIsValid: Bool { get }
@@ -14,6 +15,9 @@ class AuthViewModel: ObservableObject {
     @Published var currentUser: User?
     @Published var alertMessage: String = ""
     @Published var showAlert: Bool = false
+    @Published var errorMessage: String = ""
+    @Published var completedSignUp: Bool = false
+    
     private var listener:ListenerRegistration?
     private var db = Firestore.firestore()
     
@@ -21,7 +25,7 @@ class AuthViewModel: ObservableObject {
     private let storage: SupabaseStorageClient
     
     struct MissingFirebaseTokenError: Error {}
-
+    
     init() {
         self.userSession = Auth.auth().currentUser
         
@@ -30,10 +34,15 @@ class AuthViewModel: ObservableObject {
             supabaseKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InphYXh0a3N1YXp5dnhudGx3bXJuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzgzMTk2ODIsImV4cCI6MjA1Mzg5NTY4Mn0.5IBPLi4bdv0e04rWbaqqB9U3YDh23py4ieTijArJA8M"
         )
         self.storage = supabase.storage
-
+        
         Task {
             await refreshAuthState()
-            await fetchUser()
+            if let user = Auth.auth().currentUser {
+                let doc = try? await db.collection("Users").document(user.uid).getDocument()
+                if let data = doc?.data(), data["isProfileComplete"] as? Bool == true {
+                    await fetchUser()
+                }
+            }
             
         }
     }
@@ -45,96 +54,107 @@ class AuthViewModel: ObservableObject {
         do {
             let result = try await Auth.auth().signIn(withEmail: email, password: password)
             self.userSession = result.user
+            try await Auth.auth().currentUser?.reload()
+            let userId = result.user.uid
+            let doc = try await db.collection("Users").document(userId).getDocument()
+            
             await fetchUser()
         } catch {
             DispatchQueue.main.async {
-                        self.alertMessage = error.localizedDescription
-                        self.showAlert = true
+                self.alertMessage = error.localizedDescription
+                self.showAlert = true
             }
         }
     }
     
-    func createUser(withEmail email: String, password: String, fullName: String, profileImage: UIImage?,userName:String,dateOfBirth:Date,gender:String) async throws {
+    func completeUserProfile(fullName: String,profileImage: UIImage?,userName: String,dateOfBirth: Date,gender: String) async throws {
+        guard let user = Auth.auth().currentUser else {
+            throw NSError(domain: "AuthError", code: -1, userInfo: [NSLocalizedDescriptionKey: "No current user found."])
+        }
+        var profileImageURL: String? = ""
+        
+        if let profileImage {
+            profileImageURL = try await uploadProfileImage(image: profileImage, userId: user.uid)
+        }
+        
+        let newUser = User(
+            id: user.uid,
+            fullName: fullName,
+            email: user.email ?? "",
+            userName: userName,
+            profileImageURL: profileImageURL,
+            location: "",
+            dob: dateOfBirth,
+            gender: gender,
+            isProfileComplete: true, followersCount: 0,
+            followingCount: 0,
+            postsCount: 0,
+            bio: ""
+        )
+        
+        let encodedUser = try Firestore.Encoder().encode(newUser)
+        
+        try await db.collection("Users").document(newUser.id).setData(encodedUser)
+        
+        await fetchUser()
+        
+    }
+    
+    func checkUsernameUniqueness(_ username: String) async -> Bool {
         do {
-            // Create user in Firebase Auth
-            let result = try await Auth.auth().createUser(withEmail: email, password: password)
-            self.userSession = result.user
+            let snapshot = try await db.collection("Users")
+                .whereField("userName", isEqualTo: username)
+                .getDocuments()
             
-            // Ensure user session is available
-            guard let userSession = self.userSession else {
-                throw NSError(domain: "AuthError", code: -1, userInfo: [NSLocalizedDescriptionKey: "User session not found."])
-            }
-            
-            var profileImageURL: String? = ""
-            
-            // Upload profile image if available
-            if let profileImage {
-                profileImageURL = try await uploadProfileImage(image: profileImage, userId: userSession.uid)
-            }
-            
-            // Construct User object with safe default values
-            let newUser = User(
-                id: userSession.uid,
-                fullName: fullName,
-                email: email,
-                userName: userName,
-                profileImageURL: profileImageURL,
-                location: "",
-                dob: dateOfBirth,
-                gender: gender,
-                followersCount: 0,
-                followingCount: 0,
-                postsCount: 0,
-                bio: ""
-            )
-            
-            let encodedUser = try Firestore.Encoder().encode(newUser)
-            
-            // Save user data in Firestore
-            try await db.collection("Users").document(newUser.id).setData(encodedUser)
-            
-            // Fetch user data after creating the account
-            await fetchUser()
+            return snapshot.documents.isEmpty  // ✅ Returns true if unique
         } catch {
-            print("⚠️ Failed to create a user with error: \(error.localizedDescription)")
-            throw error
+            print("Error checking username: \(error.localizedDescription)")
+            return false
         }
     }
-
-    func checkUsernameUniqueness(_ username: String) async -> Bool {
-            do {
-                let snapshot = try await db.collection("Users")
-                    .whereField("userName", isEqualTo: username)
-                    .getDocuments()
-                
-                return snapshot.documents.isEmpty  // ✅ Returns true if unique
-            } catch {
-                print("Error checking username: \(error.localizedDescription)")
-                return false
-            }
-        }
     
     func signOut() {
         do {
             try Auth.auth().signOut()
             self.userSession = nil
             self.currentUser = nil
+            print("User Session: \(userSession)")
+            print("Current User: \(currentUser)")
         } catch {
             print("⚠️ Failed to sign out with error \(error.localizedDescription)")
         }
     }
+    
+    func sendVerificationEmail() async throws {
+        guard let user = Auth.auth().currentUser else {
+            throw NSError(domain: "Auticare.Auth", code: 401, userInfo: [NSLocalizedDescriptionKey: "No user signed in"])
+        }
+        try await user.sendEmailVerification()
+    }
+    
+    
+    func isEmailVerified() async -> Bool {
+        do{
+            try await Auth.auth().currentUser?.reload()
+            return Auth.auth().currentUser?.isEmailVerified ?? false
+        }
+        catch{
+            return false
+        }
+    }
+    
     func deleteAccount(password: String) async {
         guard let user = Auth.auth().currentUser,
               let email = user.email else { return }
         
         do {
             let userId = user.uid
-
+            
             // Step 1: Reauthenticate
             let credential = EmailAuthProvider.credential(withEmail: email, password: password)
             try await user.reauthenticate(with: credential)
             print("✅ Reauthentication successful")
-
+            
             // Step 2: Remove from followers
             let followersQuery = db.collection("Users").whereField("followers", arrayContains: userId)
             let followersSnapshot = try await followersQuery.getDocuments()
@@ -144,7 +164,7 @@ class AuthViewModel: ObservableObject {
                 ])
                 print("✅ Removed from \(document.documentID)'s followers")
             }
-
+            
             // Step 3: Remove from following
             let followingQuery = db.collection("Users").whereField("followings", arrayContains: userId)
             let followingSnapshot = try await followingQuery.getDocuments()
@@ -154,13 +174,13 @@ class AuthViewModel: ObservableObject {
                 ])
                 print("✅ Removed from \(document.documentID)'s followings")
             }
-
+            
             // Step 4: Delete user's posts and comments
             let postQuery = db.collection("Posts").whereField("userId", isEqualTo: userId)
             let postSnapshot = try await postQuery.getDocuments()
             for postDoc in postSnapshot.documents {
                 let postId = postDoc.documentID
-
+                
                 // Delete comments for each post
                 let commentQuery = db.collection("Comments").whereField("postId", isEqualTo: postId)
                 let commentSnapshot = try await commentQuery.getDocuments()
@@ -168,7 +188,7 @@ class AuthViewModel: ObservableObject {
                     try await db.collection("Comments").document(commentDoc.documentID).delete()
                     print("✅ Deleted comment \(commentDoc.documentID)")
                 }
-
+                
                 // Delete post image
                 let imagePath = "Post_Images/\(postId).jpg"
                 do {
@@ -177,15 +197,15 @@ class AuthViewModel: ObservableObject {
                 } catch {
                     print("⚠️ Failed to delete post image: \(error.localizedDescription)")
                 }
-
+                
                 try await db.collection("Posts").document(postId).delete()
                 print("✅ Deleted post: \(postId)")
             }
-
+            
             // Step 5: Delete user Firestore data
             try await db.collection("Users").document(userId).delete()
             print("✅ Deleted user document from Firestore")
-
+            
             // Step 6: Delete profile image from Supabase
             let profilePath = "Profile_Image/\(userId).jpg"
             do {
@@ -194,22 +214,20 @@ class AuthViewModel: ObservableObject {
             } catch {
                 print("⚠️ Failed to delete profile image: \(error.localizedDescription)")
             }
-
+            
             // Step 7: Delete Firebase Authentication account
             try await user.delete()
             print("✅ User deleted from Firebase Auth")
-
+            
             // Step 8: Clear session
             self.userSession = nil
             self.currentUser = nil
-
+            
         } catch {
             print("❌ Error deleting account: \(error.localizedDescription)")
         }
     }
-
-
-
+    
     func fetchUser() async {
         guard let uid = Auth.auth().currentUser?.uid else {
             self.currentUser = nil
@@ -228,7 +246,11 @@ class AuthViewModel: ObservableObject {
                 return
             }
             do{
-                self.currentUser = try snapshot.data(as: User.self)
+                let user = try snapshot.data(as: User.self)
+                self.currentUser = user
+                DispatchQueue.main.async {
+                    self.completedSignUp =  user.isProfileComplete// ✅ Set to true if user data exists
+                }
             }
             catch {
                 print("❌ Error decoding user data: \(error.localizedDescription)")
@@ -236,13 +258,13 @@ class AuthViewModel: ObservableObject {
             }
         }
     }
-
-
+    
+    
     func uploadProfileImage(image: UIImage, userId: String) async throws -> String {
         guard let imageData = image.jpegData(compressionQuality: 0.8) else {
             throw NSError(domain: "ImageError", code: 0, userInfo: [NSLocalizedDescriptionKey: "Invalid Image"])
         }
-
+        
         let fileName = "Profile_Image/\(userId)_\(UUID().uuidString).jpg"
         
         do {
@@ -260,14 +282,14 @@ class AuthViewModel: ObservableObject {
     }
     
     func refreshAuthState() async {
-            do {
-                try await Auth.auth().currentUser?.reload()
-                self.userSession = Auth.auth().currentUser
-                print("✅ Auth state refreshed: \(String(describing: userSession?.email))")
-            } catch {
-                print("⚠️ Failed to refresh auth state: \(error.localizedDescription)")
-            }
+        do {
+            self.userSession = Auth.auth().currentUser
+            try await Auth.auth().currentUser?.reload()
+            print("✅ Auth state refreshed: \(String(describing: userSession?.email))")
+        } catch {
+            print("⚠️ Failed to refresh auth state: \(error.localizedDescription)")
         }
+    }
     
     func forgotPassword(email: String) async throws {
         do {

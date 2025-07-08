@@ -8,11 +8,34 @@
 import SwiftUI
 
 struct RegistrationFlow: View {
+    @StateObject private var viewModel = RegistrationFlowViewModel()
+    @EnvironmentObject var authViewModel: AuthViewModel
+    @State private var currentStep: RegistrationStep = .emailEntry
+
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        VStack {
+            switch currentStep {
+            case .fullName:
+                FullNameStep(viewModel: viewModel, nextStep: $currentStep)
+            case .dobGender:
+                DOBGenderStep(viewModel: viewModel, nextStep: $currentStep)
+            case .profilePhoto:
+                ProfilePhotoStep(viewModel: viewModel, nextStep: $currentStep)
+            case .emailEntry:
+                EmailEntryStep(viewModel: viewModel, nextStep: $currentStep)
+            case .emailVerification:
+                EmailVerificationStep(step: $currentStep)
+            case .review:
+                ReviewStep(viewModel: viewModel)
+                    .environmentObject(authViewModel)
+            }
+        }
+        .animation(.easeInOut, value: currentStep)
+        .transition(.slide)
     }
 }
 
 #Preview {
     RegistrationFlow()
+        .environmentObject(AuthViewModel())
 }

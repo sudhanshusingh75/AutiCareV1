@@ -6,12 +6,15 @@
 //
 
 import Foundation
+
 struct AssessmentResult: Identifiable {
     let id: UUID
+    let childId: String
     let name: String
+    let dateOfBirth: Date
+    let gender: String
     let score: Int
     let dateTaken: Date
-    let imageURL: String?
     let categoryScores: [CategoryPerformance]
 }
 

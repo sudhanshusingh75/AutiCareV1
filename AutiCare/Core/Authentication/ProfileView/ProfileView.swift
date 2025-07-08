@@ -79,10 +79,13 @@ struct ProfileView: View {
                             Text("Edit Profile")
                                 .font(.subheadline)
                                 .fontWeight(.semibold)
-                            //                                .foregroundColor(.black)
+                                .padding()
                                 .foregroundStyle(Color.init(red: 0, green: 0.387, blue: 0.5))
-                                .frame(width: 360, height: 32)
-                                .overlay(RoundedRectangle(cornerRadius: 6).stroke(Color.gray, lineWidth: 1))
+                                .frame(maxWidth: .infinity)
+                                .background(Color(red:0,green: 0.387,blue: 0.5).opacity(0.1))
+                                .cornerRadius(16)
+                                .padding()
+//                                .overlay(RoundedRectangle(cornerRadius: 6).stroke(Color.gray, lineWidth: 1))
                         }
                         Divider()
                     }

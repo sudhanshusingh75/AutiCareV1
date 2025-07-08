@@ -10,4 +10,5 @@ struct GameCategory:Identifiable{
     let id = UUID()
     let name:String
     let imageUrl:String
+    let games:[GameItem]
 }

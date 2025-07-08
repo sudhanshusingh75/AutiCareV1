@@ -5,14 +5,12 @@
 //  Created by Sudhanshu Singh Rajput on 07/07/25.
 //
 
-import SwiftUI
+import Foundation
 
-struct MemoryCard: View {
-    var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
-    }
+struct MemoryCard: Identifiable {
+    let id = UUID()
+    let imageName: String
+    var isFlipped: Bool = false
+    var isMatched: Bool = false
 }
 
-#Preview {
-    MemoryCard()
-}

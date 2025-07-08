@@ -13,7 +13,7 @@ struct LoginView: View {
     @State private var emailErrorMessage: String = "" // Changed from optional to empty string
     @State private var passwordErrorMessage: String = "" // Changed from optional to empty string
     @EnvironmentObject var viewModel: AuthViewModel
-
+    
     var body: some View {
         NavigationStack {
             VStack {
@@ -24,19 +24,19 @@ struct LoginView: View {
                     .frame(width: 100, height: 200)
                     .padding(.top, 32)
                     .foregroundStyle(Color.init(red: 0, green: 0.387, blue: 0.5))
-
+                
                 Text("AutiCare")
                     .font(.system(size: 50))
                     .fontWeight(.bold)
                     .foregroundStyle(Color.init(red: 0, green: 0.387, blue: 0.5))
                     .padding(.horizontal)
-
+                
                 VStack(spacing: 12) {
                     // email
                     InputView(text: $email, title: "Email Address", placeholder: "name@example.com", errorMessage: emailErrorMessage)
                         .textInputAutocapitalization(.never)
                         .onChange(of: email) {validateEmail()}
-
+                    
                     // password
                     InputView(text: $password, title: "Password", placeholder: "Enter Your Password", isSecureField: true, errorMessage: passwordErrorMessage)
                 }
@@ -55,7 +55,7 @@ struct LoginView: View {
                     .font(.system(size: 14))
                     .foregroundStyle(Color(.systemGray))
                 }
-
+                
                 // sign In
                 ButtonView(title: "SIGN IN") {
                     Task {
@@ -78,8 +78,7 @@ struct LoginView: View {
                 
                 // Sign Up
                 NavigationLink {
-                    RegistrationView()
-                        .navigationBarBackButtonHidden()
+                    RegistrationFlow()
                 } label: {
                     HStack(spacing: 3) {
                         Text("Don't have an Account?")
@@ -88,7 +87,7 @@ struct LoginView: View {
                     .font(.system(size: 14))
                     .foregroundStyle(Color(.systemGray))
                 }
-
+                
                 Spacer()
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -98,11 +97,11 @@ struct LoginView: View {
             }
         }
     }
-
+    
     private func hideKeyboard() {
         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
-
+    
     private func validateEmail() {
         if !isValidEmail(email) {
             emailErrorMessage = "Please enter a valid email address."
@@ -115,9 +114,9 @@ struct LoginView: View {
 extension LoginView: AuthenticationProtocol {
     var formIsValid: Bool {
         return isValidEmail(email)
-
+        
     }
-
+    
     private func isValidEmail(_ email: String) -> Bool {
         // Check if email is not empty and contains a '@' symbol
         let emailRegEx = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}"

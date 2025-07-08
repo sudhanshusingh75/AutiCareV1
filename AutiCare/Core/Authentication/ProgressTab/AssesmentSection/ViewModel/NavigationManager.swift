@@ -6,3 +6,7 @@
 //
 
 import Foundation
+
+class NavigationManager:ObservableObject{
+    @Published var assessmentInProgress: Bool = false
+}

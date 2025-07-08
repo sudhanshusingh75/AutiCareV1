@@ -6,3 +6,8 @@
 //
 
 import Foundation
+struct NumberMatchItem: Identifiable {
+    let id = UUID()
+    let number: Int
+    var isMatched: Bool = false
+}

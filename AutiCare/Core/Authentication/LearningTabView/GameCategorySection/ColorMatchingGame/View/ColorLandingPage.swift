@@ -9,7 +9,31 @@ import SwiftUI
 
 struct ColorLandingPage: View {
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        NavigationStack{
+            ZStack{
+                PastelBlobBackgroundView()
+                VStack(spacing: 24)
+                {
+                    Text("Color Match Game")
+                        .font(.system(size: 40))
+                        .fontWeight(.bold)
+                    
+                    NavigationLink {
+                        ColorMatchingGameView()
+                    } label: {
+                        Text("Start Matching")
+                            .font(.headline.bold())
+                            .padding()
+                            .frame(maxWidth: .infinity)
+                            .foregroundStyle(.white)
+                            .background(Color.orange)
+                            .clipShape(RoundedRectangle(cornerRadius: 50))
+                            .padding(.horizontal,100)
+                    }
+                }
+            }
+        }
+        .navigationBarBackButtonHidden(true)
     }
 }
 

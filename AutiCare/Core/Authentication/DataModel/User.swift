@@ -17,7 +17,7 @@ struct User: Identifiable, Codable {
     var location:String? = ""
     var dob:Date
     var gender:String
-    
+    var isProfileComplete: Bool = false
     var followersCount: Int = 0
     var followingCount: Int = 0
     var postsCount: Int = 0 // Default zero

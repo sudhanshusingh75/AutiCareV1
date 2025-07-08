@@ -8,10 +8,11 @@
 import SwiftUI
 
 struct AssessmentSectionView: View {
+    @EnvironmentObject var navManager: NavigationManager
     var body: some View {
         VStack(spacing: 18){
             HStack{
-                Text("ISAA ASSESSMENT")
+                Text("ISAA Assessment")
                     .font(.title.bold())
                     .foregroundStyle(Color(red: 0, green: 0.387, blue: 0.5))
                 Spacer()
@@ -27,9 +28,11 @@ struct AssessmentSectionView: View {
                 .font(.headline)
                 .fontWeight(.semibold)
                 .multilineTextAlignment(.leading)
-            NavigationLink {
-                Text("Hello World")
-            } label: {
+            
+            NavigationLink(destination: ChildDetailsView()
+                .environmentObject(navManager),
+                           isActive:$navManager.assessmentInProgress) {
+                
                 Text("Take Assessment")
                     .font(.title2.bold())
                     .foregroundStyle(.white)
@@ -37,6 +40,7 @@ struct AssessmentSectionView: View {
                     .frame(maxWidth: .infinity)
                     .background(Color(red: 0, green: 0.387, blue: 0.5))
                     .cornerRadius(20)
+                
             }
             
         }

@@ -7,57 +7,33 @@
 
 import SwiftUI
 
-struct BackgroundCirclesView: View {
-    @State private var circles: [CircleData] = []
-    let circleCount = 35
+struct PastelBlobBackgroundView: View {
+    let colors: [Color] = [
+        Color(red: 1.0, green: 0.8, blue: 0.8), // light pink
+        Color(red: 0.8, green: 0.9, blue: 1.0), // light blue
+        Color(red: 0.9, green: 1.0, blue: 0.9), // mint
+        Color(red: 1.0, green: 1.0, blue: 0.8), // light yellow
+        Color(red: 0.95, green: 0.85, blue: 1.0) // lavender
+    ]
+
     var body: some View {
         GeometryReader { geometry in
             ZStack {
-                ForEach(circles) { circle in
-                    Circle()
-                        .fill(circle.color.opacity(circle.opacity))
-                        .frame(width: circle.size, height: circle.size)
-                        .position(circle.position)
-                        .blur(radius: circle.blur)
-                        .animation(.easeInOut(duration: circle.animationDuration).repeatForever(autoreverses: true), value: circle.id)
+                ForEach(0..<30, id: \.self) { _ in
+                    Ellipse()
+                        .fill(colors.randomElement()!.opacity(0.4))
+                        .frame(width: CGFloat.random(in: 40...100),
+                               height: CGFloat.random(in: 20...60))
+                        .rotationEffect(.degrees(Double.random(in: 0...360)))
+                        .position(x: CGFloat.random(in: 0...geometry.size.width),
+                                  y: CGFloat.random(in: 0...geometry.size.height))
                 }
             }
-            .onAppear {
-                circles = (0..<circleCount).map { _ in
-                    CircleData(in: geometry.size)
-                }
-            }
+            .ignoresSafeArea()
         }
-        .ignoresSafeArea()
-    }
-}
-
-struct CircleData: Identifiable {
-    let id = UUID()
-    let size: CGFloat
-    let color: Color
-    let opacity: Double
-    let blur: CGFloat
-    let animationDuration: Double
-    let position: CGPoint
-
-    init(in size: CGSize) {
-        self.size = CGFloat.random(in: 10...80)
-        self.color = Color(
-            hue: Double.random(in: 0...1),
-            saturation: 0.3,
-            brightness: 1
-        )
-        self.opacity = Double.random(in: 0.5...0.8)
-        self.blur = CGFloat.random(in: 1...5)
-        self.animationDuration = Double.random(in: 2...5)
-        self.position = CGPoint(
-            x: CGFloat.random(in: 0...size.width),
-            y: CGFloat.random(in: 0...size.height)
-        )
     }
 }
 
 #Preview {
-    BackgroundCirclesView()
+    PastelBlobBackgroundView()
 }
