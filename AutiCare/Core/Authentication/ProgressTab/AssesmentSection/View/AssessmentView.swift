@@ -23,7 +23,10 @@ struct AssessmentView: View {
                 .font(.title)
                 .bold()
                 .padding(.top)
-            
+            ProgressView(value: Double(currentCategoryIndex + 1), total: Double(viewModel.question.count))
+                .padding(.horizontal)
+                .accentColor(Color(red: 0, green: 0.387, blue: 0.5))
+                .animation(.easeInOut, value: currentCategoryIndex)
             // Show questions for current category
             ScrollView(showsIndicators: false){
                 OptionLegendView()
@@ -67,7 +70,7 @@ struct AssessmentView: View {
             // Navigation to result view (placeholder)
             NavigationLink(
                 destination: AssessmentResultView(childId: child.id,showSaveButton: true)
-                .environmentObject(navManager),
+                    .environmentObject(navManager),
                 isActive: $navigateToResults
             ) {
                 EmptyView()

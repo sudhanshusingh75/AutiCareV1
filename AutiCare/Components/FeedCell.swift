@@ -206,15 +206,15 @@ struct FeedCell: View {
                     CommentSectionView(viewModel: CommentViewModel(postId: post.id))
                         .presentationDragIndicator(.visible)
                 }
-                    Button {
-                        sharePost()
-                    } label: {
-                        Image(systemName: "arrow.uturn.right")
-                            .resizable()
-                            .foregroundStyle(Color.init(red: 0, green: 0.387, blue: 0.5))
-                            .frame(width: 18,height: 18)
-
-                    }
+//                    Button {
+//                        sharePost()
+//                    } label: {
+//                        Image(systemName: "arrow.uturn.right")
+//                            .resizable()
+//                            .foregroundStyle(Color.init(red: 0, green: 0.387, blue: 0.5))
+//                            .frame(width: 18,height: 18)
+//
+//                    }
                     Spacer()
             }.padding(.horizontal)
                 .padding(.top,10)

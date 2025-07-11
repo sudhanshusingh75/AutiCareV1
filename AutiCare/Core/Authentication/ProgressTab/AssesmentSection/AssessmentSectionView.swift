@@ -9,6 +9,7 @@ import SwiftUI
 
 struct AssessmentSectionView: View {
     @EnvironmentObject var navManager: NavigationManager
+    @State private var showPDF:Bool = false
     var body: some View {
         VStack(spacing: 18){
             HStack{
@@ -17,7 +18,9 @@ struct AssessmentSectionView: View {
                     .foregroundStyle(Color(red: 0, green: 0.387, blue: 0.5))
                 Spacer()
                 Button {
-                    
+                    if let url = URL(string: "http://www.arppassociation.org/Downloads/ISAA_Tool.pdf"){
+                        UIApplication.shared.open(url)
+                    }
                 } label: {
                     Image(systemName: "info.circle")
                         .scaledToFill()
@@ -52,5 +55,5 @@ struct AssessmentSectionView: View {
 }
 
 #Preview {
-    AssessmentSectionView()
+    AssessmentSectionView().environmentObject(NavigationManager())
 }

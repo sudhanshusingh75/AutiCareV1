@@ -15,10 +15,11 @@ struct ProgressTab: View {
                 AssessmentSectionView()
                 ResultSectionView()
             }
+            .environmentObject(navManager)
             .navigationTitle("Progress")
             .navigationBarTitleDisplayMode(.inline)
-            .environmentObject(navManager)
         }
+
     }
 }
 

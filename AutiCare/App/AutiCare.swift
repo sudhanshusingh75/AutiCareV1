@@ -18,7 +18,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         // Check if it's the first launch after installation
         if UserDefaults.standard.bool(forKey: "isFirstLaunch") == false {
             // Sign out the user if it is the first launch after installation
-            do{
+            do {
                 try Auth.auth().signOut()
             }
             catch{
@@ -31,7 +31,6 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         return true
     }
 }
-
 @main
 struct AutiCare: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate

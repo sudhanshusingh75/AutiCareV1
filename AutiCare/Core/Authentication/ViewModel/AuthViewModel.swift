@@ -27,6 +27,7 @@ class AuthViewModel: ObservableObject {
     struct MissingFirebaseTokenError: Error {}
     
     init() {
+        
         self.userSession = Auth.auth().currentUser
         
         self.supabase = SupabaseClient(
@@ -53,6 +54,9 @@ class AuthViewModel: ObservableObject {
     func signIn(withEmail email: String, password: String) async throws {
         do {
             let result = try await Auth.auth().signIn(withEmail: email, password: password)
+            if result.user.isEmailVerified{
+                
+            }
             self.userSession = result.user
             try await Auth.auth().currentUser?.reload()
             let userId = result.user.uid

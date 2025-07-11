@@ -11,7 +11,7 @@ import PhotosUI
 struct AddNewPostView: View {
     @State private var selectedTag = ""
     let columns = [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())]
-//    @Binding var posts: [Posts]
+    //    @Binding var posts: [Posts]
     var onPostAdded: (() -> Void)?
     @StateObject private var viewModel = AddNewPostViewModel()
     @StateObject private var profileVM = ProfileViewModel()
@@ -20,8 +20,39 @@ struct AddNewPostView: View {
     
     var body: some View {
         NavigationStack{
-            ScrollView{
+            ScrollView(showsIndicators: false){
                 VStack(alignment: .leading, spacing: 16) {
+                    
+                    VStack(alignment: .leading, spacing: 8) {
+                        HStack(spacing: 8) {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .foregroundColor(.yellow)
+                            Text("Community Guidelines")
+                                .font(.headline)
+                        }
+                        
+                        Text("""
+                    Please respect the privacy and safety of all members:
+                    
+                    • Avoid sharing your child’s full name or identifiable photos.
+                    • Use nicknames or initials to maintain anonymity.
+                    • Share experiences respectfully and supportively.
+                    • No medical advice or diagnoses — this is a peer support space.
+                    
+                    By posting, you agree to follow these guidelines.
+                    """)
+                        .font(.footnote)
+                        .foregroundColor(.gray)
+                    }
+                    .padding()
+                    .frame(maxWidth:.infinity)
+                    .background(Color.yellow.opacity(0.1))
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
+//                    .shadow(radius: 2)
+//                    .overlay(content: {
+//                        RoundedRectangle(cornerRadius: 10).stroke(.red,lineWidth: 1)
+//                    })
+                    .padding(.horizontal)
                     
                     // **Post Description**
                     VStack(alignment: .leading) {
@@ -60,14 +91,14 @@ struct AddNewPostView: View {
                     
                     HStack(spacing:20) {
                         Spacer()
-//                        PhotosPicker(selection: $viewModel.selectedItems, matching: .images, photoLibrary: .shared()){
-//                            Button { } label: {
-//                                Image(systemName: "camera")
-//                                    .resizable()
-//                                    .scaledToFill()
-//                                    .frame(width: 18,height: 18)
-//                            }
-//                        }
+                        //                        PhotosPicker(selection: $viewModel.selectedItems, matching: .images, photoLibrary: .shared()){
+                        //                            Button { } label: {
+                        //                                Image(systemName: "camera")
+                        //                                    .resizable()
+                        //                                    .scaledToFill()
+                        //                                    .frame(width: 18,height: 18)
+                        //                            }
+                        //                        }
                         PhotosPicker(selection: $viewModel.selectedItems, matching: .images, photoLibrary: .shared()){
                             Image(systemName: "photo")
                                 .resizable()
@@ -120,8 +151,8 @@ struct AddNewPostView: View {
                     }
                 }
             }
+            .padding()
         }
-        .padding()
     }
 }
 

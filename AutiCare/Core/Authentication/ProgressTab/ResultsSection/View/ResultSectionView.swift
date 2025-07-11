@@ -4,7 +4,7 @@ struct ResultSectionView: View {
     @StateObject private var viewModel = ResultViewModel()
     @EnvironmentObject var navManager: NavigationManager
     var body: some View {
-        NavigationStack {
+//        NavigationStack {
             ScrollView {
                 if viewModel.results.isEmpty {
                     Text("No results to show. Try completing assessment to view progress.")
@@ -16,8 +16,14 @@ struct ResultSectionView: View {
                             VStack(alignment: .leading) {
                                 Text(result.name)
                                     .font(.headline)
-                                Text("Score: \(result.score)")
+                                
+                                var percentage: Int {
+                                    let max = 195
+                                    return Int(Double(result.score) / Double(max) * 100)
+                                }
+                                Text("Score: \(percentage)%")
                                     .font(.subheadline)
+                                
                                 Text("Taken on \(formattedDate(result.dateTaken))")
                                     .font(.caption)
                                     .foregroundColor(.gray)
@@ -47,9 +53,9 @@ struct ResultSectionView: View {
                     }
                 }
             }
-            .navigationTitle("Assessment Results")
-            .navigationBarTitleDisplayMode(.inline)
-        }
+//            .navigationTitle("Assessment Results")
+//            .navigationBarTitleDisplayMode(.inline)
+//        }
         .onAppear {
             viewModel.fetchResults()
         }
