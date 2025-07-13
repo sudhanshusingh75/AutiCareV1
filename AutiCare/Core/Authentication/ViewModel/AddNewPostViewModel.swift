@@ -111,7 +111,7 @@ class AddNewPostViewModel: ObservableObject {
         )
 
         do {
-            try await db.collection("Posts").document(postId).setData(from: newPost)
+            try db.collection("Posts").document(postId).setData(from: newPost)
             let userRef = db.collection("Users").document(user.id)
             try await userRef.updateData([
                 "posts": FieldValue.arrayUnion([postId]),

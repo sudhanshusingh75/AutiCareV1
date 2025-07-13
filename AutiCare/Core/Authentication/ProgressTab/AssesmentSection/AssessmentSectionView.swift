@@ -27,11 +27,15 @@ struct AssessmentSectionView: View {
                         .foregroundStyle(Color(red: 0, green: 0.387, blue: 0.5))
                 }
             }
-            Text("The ISAA Assessment helps you understand your child’s social, emotional, and communication behaviors. It’s a simple tool to screen for early signs of autism and guide informed support.")
-                .font(.headline)
-                .fontWeight(.semibold)
-                .multilineTextAlignment(.leading)
-            
+            VStack(alignment: .leading){
+                Text("The ISAA Assessment helps you understand your child’s social, emotional, and communication behaviors. It’s a simple tool to screen for early signs of autism and guide informed support.")
+                    .font(.headline)
+                    .multilineTextAlignment(.leading)
+                Text("Estimated Time: 10–15 minutes")
+                    .font(.subheadline)
+                    .foregroundStyle(.gray)
+                    .multilineTextAlignment(.leading)
+            }
             NavigationLink(destination: ChildDetailsView()
                 .environmentObject(navManager),
                            isActive:$navManager.assessmentInProgress) {

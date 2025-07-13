@@ -112,7 +112,7 @@ class ProfileViewModel:ObservableObject{
         }
         do{
             try await db.collection("Users").document(userId).updateData(updates)
-            await fetchUser(userId: userId)
+            fetchUser(userId: userId)
             print("User Profile Updated Successfully!")
         }
         catch{
@@ -130,7 +130,7 @@ class ProfileViewModel:ObservableObject{
         do{
             if let oldProfileImageURL = oldProfileImageURL{
                 let oldFileName = oldProfileImageURL.split(separator: "/").last.map{String($0)} ?? ""
-                try await supabase.storage.from("user-uploads").remove(paths: [oldFileName])
+                let path = try await supabase.storage.from("user-uploads").remove(paths: [oldFileName])
                 print("✅ Old image deleted: \(oldFileName)")
             }
             

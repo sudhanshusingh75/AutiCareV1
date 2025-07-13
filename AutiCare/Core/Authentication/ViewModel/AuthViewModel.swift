@@ -17,6 +17,8 @@ class AuthViewModel: ObservableObject {
     @Published var showAlert: Bool = false
     @Published var errorMessage: String = ""
     @Published var completedSignUp: Bool = false
+    @Published var emailVerfied: Bool = false
+    @Published var isLoading:Bool = true
     
     private var listener:ListenerRegistration?
     private var db = Firestore.firestore()
@@ -38,12 +40,6 @@ class AuthViewModel: ObservableObject {
         
         Task {
             await refreshAuthState()
-            if let user = Auth.auth().currentUser {
-                let doc = try? await db.collection("Users").document(user.uid).getDocument()
-                if let data = doc?.data(), data["isProfileComplete"] as? Bool == true {
-                    await fetchUser()
-                }
-            }
             
         }
     }
@@ -55,14 +51,8 @@ class AuthViewModel: ObservableObject {
         do {
             let result = try await Auth.auth().signIn(withEmail: email, password: password)
             if result.user.isEmailVerified{
-                
+                await refreshAuthState()
             }
-            self.userSession = result.user
-            try await Auth.auth().currentUser?.reload()
-            let userId = result.user.uid
-            let doc = try await db.collection("Users").document(userId).getDocument()
-            
-            await fetchUser()
         } catch {
             DispatchQueue.main.async {
                 self.alertMessage = error.localizedDescription
@@ -122,8 +112,6 @@ class AuthViewModel: ObservableObject {
             try Auth.auth().signOut()
             self.userSession = nil
             self.currentUser = nil
-            print("User Session: \(userSession)")
-            print("Current User: \(currentUser)")
         } catch {
             print("⚠️ Failed to sign out with error \(error.localizedDescription)")
         }
@@ -136,11 +124,11 @@ class AuthViewModel: ObservableObject {
         try await user.sendEmailVerification()
     }
     
-    
     func isEmailVerified() async -> Bool {
         do{
             try await Auth.auth().currentUser?.reload()
-            return Auth.auth().currentUser?.isEmailVerified ?? false
+            self.emailVerfied = Auth.auth().currentUser?.isEmailVerified ?? false
+            return emailVerfied
         }
         catch{
             return false
@@ -196,7 +184,7 @@ class AuthViewModel: ObservableObject {
                 // Delete post image
                 let imagePath = "Post_Images/\(postId).jpg"
                 do {
-                    try await storage.from("user-uploads").remove(paths: [imagePath])
+                   let path = try await storage.from("user-uploads").remove(paths: [imagePath])
                     print("✅ Deleted post image: \(imagePath)")
                 } catch {
                     print("⚠️ Failed to delete post image: \(error.localizedDescription)")
@@ -213,7 +201,7 @@ class AuthViewModel: ObservableObject {
             // Step 6: Delete profile image from Supabase
             let profilePath = "Profile_Image/\(userId).jpg"
             do {
-                try await storage.from("user-uploads").remove(paths: [profilePath])
+                let path = try await storage.from("user-uploads").remove(paths: [profilePath])
                 print("✅ Deleted profile image: \(profilePath)")
             } catch {
                 print("⚠️ Failed to delete profile image: \(error.localizedDescription)")
@@ -227,6 +215,8 @@ class AuthViewModel: ObservableObject {
             self.userSession = nil
             self.currentUser = nil
             
+            await refreshAuthState()
+            
         } catch {
             print("❌ Error deleting account: \(error.localizedDescription)")
         }
@@ -237,33 +227,33 @@ class AuthViewModel: ObservableObject {
             self.currentUser = nil
             return
         }
-        
-        listener = db.collection("Users").document(uid).addSnapshotListener { [weak self] documentSnapshot, error in
-            guard let self = self else { return }
-            
-            if let error = error {
-                print("❌ Error fetching current user: \(error.localizedDescription)")
-                return
-            }
-            guard let snapshot = documentSnapshot else {
-                self.currentUser = nil
-                return
-            }
-            do{
-                let user = try snapshot.data(as: User.self)
-                self.currentUser = user
+        do {
+            let doc = try await db.collection("Users").document(uid).getDocument()
+
+            guard doc.data() != nil else {
+                print("❌ No user data found.")
                 DispatchQueue.main.async {
-                    self.completedSignUp =  user.isProfileComplete// ✅ Set to true if user data exists
+                    self.completedSignUp = false
                 }
+                return
             }
-            catch {
-                print("❌ Error decoding user data: \(error.localizedDescription)")
+
+            let user = try doc.data(as: User.self)
+
+            DispatchQueue.main.async {
+                self.currentUser = user
+                self.completedSignUp = user.isProfileComplete
+            }
+
+        } catch {
+            print("❌ Error fetching user: \(error.localizedDescription)")
+            DispatchQueue.main.async {
                 self.currentUser = nil
+                self.completedSignUp = false
             }
         }
     }
-    
-    
+
     func uploadProfileImage(image: UIImage, userId: String) async throws -> String {
         guard let imageData = image.jpegData(compressionQuality: 0.8) else {
             throw NSError(domain: "ImageError", code: 0, userInfo: [NSLocalizedDescriptionKey: "Invalid Image"])
@@ -276,7 +266,7 @@ class AuthViewModel: ObservableObject {
             let _ = try await storage.from("user-uploads").upload(fileName, data: imageData)
             
             // Get Public URL
-            let downloadURL = try await storage.from("user-uploads").getPublicURL(path: fileName).absoluteString
+            let downloadURL = try storage.from("user-uploads").getPublicURL(path: fileName).absoluteString
             
             print("✅ Image uploaded successfully: \(downloadURL)")
             return downloadURL
@@ -284,14 +274,23 @@ class AuthViewModel: ObservableObject {
             throw NSError(domain: "UploadError", code: 0, userInfo: [NSLocalizedDescriptionKey: "Failed to upload image to Supabase Storage"])
         }
     }
-    
     func refreshAuthState() async {
         do {
-            self.userSession = Auth.auth().currentUser
             try await Auth.auth().currentUser?.reload()
+            self.userSession = Auth.auth().currentUser
+            self.emailVerfied = await isEmailVerified()
+            if userSession != nil{
+                await fetchUser()
+            }
+            DispatchQueue.main.async {
+                self.isLoading = false
+            }
             print("✅ Auth state refreshed: \(String(describing: userSession?.email))")
         } catch {
             print("⚠️ Failed to refresh auth state: \(error.localizedDescription)")
+            DispatchQueue.main.async {
+                self.isLoading = false
+            }
         }
     }
     
@@ -303,6 +302,5 @@ class AuthViewModel: ObservableObject {
             throw error // ✅ This is the key change
         }
     }
-    
 }
 

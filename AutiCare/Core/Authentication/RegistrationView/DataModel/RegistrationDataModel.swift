@@ -10,6 +10,8 @@ import Foundation
 enum RegistrationStep {
     case emailEntry
     case emailVerification
+}
+enum ProfileCompletionStep{
     case fullName
     case dobGender
     case profilePhoto

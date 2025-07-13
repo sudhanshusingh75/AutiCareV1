@@ -38,6 +38,9 @@ struct AutiCare: App {
     var body: some Scene {
         WindowGroup {
             ContentView().environmentObject(viewModel)
+                .task {
+                    await viewModel.refreshAuthState()
+            }
         }
     }
 }

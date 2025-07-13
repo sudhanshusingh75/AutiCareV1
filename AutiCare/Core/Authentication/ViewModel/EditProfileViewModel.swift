@@ -150,7 +150,7 @@ class EditProfileViewModel:ObservableObject{
             // Remove old image
             if let oldFileName = oldProfileImageURL.components(separatedBy: "/").last {
                 let oldPath = "Profile_Image/\(oldFileName)"
-                try await SupabaseManager.shared.storage
+               let path =  try await SupabaseManager.shared.storage
                     .from(bucketName)
                     .remove(paths: [oldPath])
                 print("🗑️ Deleted old image at: \(oldPath)")
@@ -159,7 +159,7 @@ class EditProfileViewModel:ObservableObject{
             // Upload new image
             _ = try await SupabaseManager.shared.storage
                 .from(bucketName)
-                .upload(path: filePath, file: imageData, options: FileOptions(contentType: "image/jpeg"))
+                .upload(filePath, data: imageData, options: FileOptions(contentType: "image/jpeg"))
             print("✅ Uploaded new image at: \(filePath)")
 
             // Get public URL the right way

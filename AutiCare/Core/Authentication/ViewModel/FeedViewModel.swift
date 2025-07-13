@@ -253,7 +253,7 @@ class FeedViewModel: ObservableObject,Identifiable {
         let path = url.pathComponents.suffix(2).joined(separator: "/") // Extract correct path
         
         do {
-            try await supabase.storage.from("user-uploads").remove(paths: [path])
+           let path = try await supabase.storage.from("user-uploads").remove(paths: [path])
             print("✅ Image deleted from Supabase: \(imageUrl)")
         } catch {
             print("❌ Error deleting image from Supabase: \(error.localizedDescription)")
@@ -298,7 +298,7 @@ class FeedViewModel: ObservableObject,Identifiable {
         )
 
         do {
-            let _ = try await db.collection("reports").addDocument(from: report)
+            let _ = try db.collection("reports").addDocument(from: report)
             print("Post reported successfully!")
         } catch {
             print("Error reporting post: \(error.localizedDescription)")

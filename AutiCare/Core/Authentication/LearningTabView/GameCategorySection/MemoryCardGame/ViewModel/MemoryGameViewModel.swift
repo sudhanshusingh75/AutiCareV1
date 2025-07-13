@@ -43,7 +43,7 @@ class MemoryGameViewModel: ObservableObject {
     
     func startNewGame() {
         let images = ["star", "circle", "heart", "moon", "bolt", "leaf", "sun.max", "cloud"]
-        var deck = (images + images).shuffled() // create 2 of each
+        let deck = (images + images).shuffled() // create 2 of each
         cards = deck.map { MemoryCard(imageName: $0) }
         selectedIndices = []
         isGameCompleted = false

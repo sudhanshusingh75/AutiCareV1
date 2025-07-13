@@ -10,7 +10,7 @@ import PhotosUI
 
 struct ProfilePhotoStep: View {
     @ObservedObject var viewModel: RegistrationFlowViewModel
-    @Binding var nextStep: RegistrationStep
+    @Binding var nextStep: ProfileCompletionStep
     @State private var selectedItem: PhotosPickerItem?
 
     var body: some View {

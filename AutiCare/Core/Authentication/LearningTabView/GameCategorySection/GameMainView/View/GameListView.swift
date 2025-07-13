@@ -71,8 +71,8 @@ struct GameListView: View {
             ColorMatchingDisplayView()
         case "Shape Matching":
             ShapeMatchingDisplayView()
-        case "Memory Match":
-            MemoryMatchingDisplayView()
+//        case "Memory Match":
+//            MemoryMatchingDisplayView()
         default:
             Image(game.imageName)
                 .resizable()

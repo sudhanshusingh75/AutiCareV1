@@ -9,10 +9,12 @@ import SwiftUI
 
 struct DOBGenderStep: View {
     @ObservedObject var viewModel: RegistrationFlowViewModel
-    @Binding var nextStep: RegistrationStep
+    @Binding var nextStep: ProfileCompletionStep
     
     @State private var showError = false
     @State private var errorMessage = ""
+    @State private var dobErrorMessage = ""
+    @State private var genderErrorMessage = ""
     
     var body: some View {
         NavigationStack {
@@ -39,7 +41,7 @@ struct DOBGenderStep: View {
                             .onChange(of: viewModel.dateOfBirth) {
                                 viewModel.dateOfBirthSet = true
                                 viewModel.vaildateDateOfBirth()
-                            }
+                        }
                     }
                     
                     Divider()
@@ -50,7 +52,7 @@ struct DOBGenderStep: View {
                     }
                 }
                 
-                VStack(spacing: 12) {
+                VStack(alignment:.leading,spacing: 12) {
                     HStack {
                         VStack(alignment: .leading,spacing: 12) {
                             Text("Gender :")
@@ -79,17 +81,17 @@ struct DOBGenderStep: View {
                             viewModel.validateGender()
                         }
                     }
-                    
+                    Divider()
                     if !viewModel.genderErrorMessage.isEmpty {
                         Text(viewModel.genderErrorMessage)
                             .foregroundColor(.red)
                             .font(.caption)
                     }
-                    
-                    Divider()
                 }
                 
                 Button(action: {
+                    viewModel.validateGender()
+                    viewModel.vaildateDateOfBirth()
                     if viewModel.dobErrorMessage.isEmpty && viewModel.genderErrorMessage.isEmpty {
                         nextStep = .profilePhoto
                     }

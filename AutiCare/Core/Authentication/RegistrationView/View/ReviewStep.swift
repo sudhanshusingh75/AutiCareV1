@@ -12,7 +12,7 @@ struct ReviewStep: View {
     @EnvironmentObject var authViewModel: AuthViewModel
     @State private var agreedToTerms = false
     @State private var showAlert = false
-
+    @State private var isLoading = false
     var body: some View {
         NavigationStack {
             ScrollView(showsIndicators: false) {
@@ -48,13 +48,12 @@ struct ReviewStep: View {
                     
                     // User Details
                     VStack(alignment: .leading, spacing: 12) {
-                        Text("Email: \(viewModel.email)")
-                        Divider()
                         Text("Full Name: \(viewModel.fullName)")
                         Divider()
                         Text("DOB: \(viewModel.dateOfBirth.formatted(date: .abbreviated, time: .omitted))")
                         Divider()
                         Text("Gender: \(viewModel.selectedGender)")
+                        Divider()
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .font(.body)
@@ -77,15 +76,17 @@ struct ReviewStep: View {
                     
                     // Finalize Button
                     Button {
-                        if agreedToTerms {
+                        if agreedToTerms && !isLoading {
+                            isLoading = true
                             Task {
                                 await viewModel.finalizeRegistration(authViewModel: authViewModel)
+                                isLoading = false
                             }
-                        } else {
+                        } else if !agreedToTerms {
                             showAlert = true
                         }
                     } label: {
-                        Text("Done")
+                        Text(isLoading ? "Registering..." : "Register")
                             .font(.headline)
                             .padding()
                             .frame(maxWidth: .infinity)

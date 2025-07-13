@@ -25,15 +25,28 @@ struct ChildDetailsView: View {
         formatter.dateFormat = "dd/MM/yyyy"
         return formatter.string(from: dateOfBirth)
     }
+    var formIsValid: Bool {
+        return fullNameErrorMessage.isEmpty &&
+               dobErrorMessage.isEmpty &&
+               genderErrorMessage.isEmpty &&
+               !fullName.isEmpty &&
+               dateOfBirthSet &&
+               selectedGender != "Select Gender"
+    }
+
     var body: some View {
         NavigationStack{
-            VStack(alignment: .leading){
-                Text("Enter Your Child Details")
-                    .font(.title.bold())
-                    .padding(.horizontal)
-                    .multilineTextAlignment(.leading)
-            }
             ScrollView(showsIndicators:false){
+                VStack(alignment: .leading){
+                    Text("Enter Your Child Details")
+                        .font(.title.bold())
+                        .padding(.horizontal)
+                        .multilineTextAlignment(.leading)
+                    
+                    Text("Enter Your child details to Enable Start Assessment Button")
+                        .font(.caption)
+                        .foregroundStyle(.gray)
+                }
                 VStack{
                     InputView(text: $fullName, title: "Full Name :", placeholder: "Enter Your Name", errorMessage: fullNameErrorMessage)
                         .onChange(of: fullName) { validateFullName() }
@@ -116,12 +129,13 @@ struct ChildDetailsView: View {
                         .padding()
                         .foregroundStyle(Color(.white))
                         .frame(maxWidth: .infinity)
-                        .background(Color(red: 0, green: 0.387, blue: 0.5))
+                        .background(formIsValid ? Color(red: 0, green: 0.387, blue: 0.5):Color(red: 0, green: 0.387, blue: 0.5).opacity(0.5))
                         .cornerRadius(16)
                         .padding(.horizontal)
                 }
+                .disabled(!formIsValid)
             }
-//            .toolbar(.hidden,for:.navigationBar)
+            .toolbar(.hidden,for:.navigationBar)
         }
     }
     private func validateGender() {

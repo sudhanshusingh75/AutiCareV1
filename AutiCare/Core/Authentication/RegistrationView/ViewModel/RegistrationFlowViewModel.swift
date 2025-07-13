@@ -57,7 +57,7 @@ class RegistrationFlowViewModel: ObservableObject {
         }
     }
     func validateGender() {
-        if selectedGender == "" {
+        if selectedGender == "" || selectedGender == "Select Gender"{
             genderErrorMessage = "Please select a gender."
         } else {
             genderErrorMessage = ""
@@ -87,6 +87,7 @@ class RegistrationFlowViewModel: ObservableObject {
                 dateOfBirth: dateOfBirth,
                 gender: selectedGender
             )
+            await authViewModel.refreshAuthState()
 
         } catch {
             print("❌ Registration failed: \(error.localizedDescription)")

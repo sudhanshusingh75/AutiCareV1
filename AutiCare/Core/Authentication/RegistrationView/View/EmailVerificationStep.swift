@@ -12,7 +12,7 @@ struct EmailVerificationStep: View {
     @EnvironmentObject var authViewModel: AuthViewModel
     @Binding var step: RegistrationStep
     
-    @State private var isSending = false
+    @State private var isChecking = false
     @State private var showAlert = false
     @State private var alertMessage = ""
     
@@ -24,32 +24,32 @@ struct EmailVerificationStep: View {
                 Text("We've sent a verification link to your email. Please verify to continue.")
                     .foregroundStyle(.gray)
                     .multilineTextAlignment(.leading)
-                
                 Button {
+                    isChecking = true
                     Task {
-                        do {
-                            try await authViewModel.refreshAuthState()
-                            if Auth.auth().currentUser?.isEmailVerified == true {
-                                step = .fullName
-                            } else {
-                                alertMessage = "Email is not verified yet."
-                                showAlert = true
-                            }
-                        } catch {
-                            alertMessage = "Failed to check verification: \(error.localizedDescription)"
+                        await authViewModel.refreshAuthState()
+                        isChecking = false
+                        if authViewModel.emailVerfied == false{
+                            alertMessage = "Email is not verified yet."
                             showAlert = true
                         }
                     }
                 } label: {
-                    Text("I Have Verified My Email")
-                        .font(.headline)
-                        .padding()
-                        .frame(maxWidth: .infinity)
-                        .foregroundStyle(.white)
-                        .background(Color(red: 0, green: 0.387, blue: 0.5))
-                        .cornerRadius(16)
-                        .padding(.horizontal)
-                    
+                    if isChecking {
+                        ProgressView()
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                    }
+                    else{
+                        Text("I Have Verified My Email")
+                            .font(.headline)
+                            .padding()
+                            .frame(maxWidth: .infinity)
+                            .foregroundStyle(.white)
+                            .background(Color(red: 0, green: 0.387, blue: 0.5))
+                            .cornerRadius(16)
+                            .padding(.horizontal)
+                    }
                 }
                 Button {
                     Task {
@@ -69,7 +69,7 @@ struct EmailVerificationStep: View {
                         .frame(maxWidth: .infinity)
                         .padding(.horizontal)
                 }
-
+                
                 Spacer()
             }
             .padding()
@@ -82,6 +82,3 @@ struct EmailVerificationStep: View {
     }
 }
 
-#Preview {
-    EmailVerificationStep(step: .constant(.fullName))
-}

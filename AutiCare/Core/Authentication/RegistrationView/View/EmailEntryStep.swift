@@ -15,6 +15,10 @@ struct EmailEntryStep: View {
     @State private var isLoading = false
     @State private var showError = false
     @State private var errorMessage = ""
+    @State private var emailErrorMessage: String = ""
+    @State private var passwordErrorMessage: String = ""
+    @State private var confirmPasswordErrorMessage: String = ""
+
     @Environment(\.dismiss) var dismiss
 
     var body: some View {
@@ -28,30 +32,33 @@ struct EmailEntryStep: View {
                         .multilineTextAlignment(.leading)
                 }
                 
-                InputView(text: $viewModel.email, title: "Email", placeholder: "Email Address")
-                InputView(text: $viewModel.password, title: "Password", placeholder: "Password", isSecureField: true)
-                InputView(text: $viewModel.confirmPassword, title: "Confirm Password", placeholder: "Confirm Password", isSecureField: true)
-                
-                if showError {
-                    Text(errorMessage)
-                        .foregroundColor(.red)
-                        .font(.caption)
-                }
-                
+                InputView(text: $viewModel.email, title: "Email", placeholder: "Email Address",errorMessage: emailErrorMessage)
+                    .textInputAutocapitalization(.never)
+                    .onChange(of: viewModel.email) {_,_ in
+                        validateEmail()
+                    }
+                InputView(text: $viewModel.password, title: "Password", placeholder: "Password", isSecureField: true,errorMessage: passwordErrorMessage)
+                    .onChange(of: viewModel.password) {_,_ in
+                        validatePassword()
+                    }
+                InputView(text: $viewModel.confirmPassword, title: "Confirm Password", placeholder: "Confirm Password", isSecureField: true,errorMessage: confirmPasswordErrorMessage)
+                    .onChange(of: viewModel.confirmPassword) { _, _ in
+                        validateConfirmPassword()
+                    }
+//                if showError {
+//                    Text(errorMessage)
+//                        .foregroundColor(.red)
+//                        .font(.caption)
+//                }
                 Button {
-                    if !viewModel.isValidEmail(viewModel.email) {
-                        errorMessage = "Please enter a valid email address."
+                    validateEmail()
+                    validatePassword()
+                    validateConfirmPassword()
+                    guard emailErrorMessage.isEmpty,
+                          passwordErrorMessage.isEmpty,
+                          confirmPasswordErrorMessage.isEmpty else {
                         showError = true
-                        return
-                    }
-                    if let passwordError = viewModel.passwordValidationMessage(viewModel.password) {
-                        errorMessage = passwordError
-                        showError = true
-                        return
-                    }
-                    if viewModel.password != viewModel.confirmPassword {
-                        errorMessage = "Passwords do not match."
-                        showError = true
+                        errorMessage = "Please fix the errors above."
                         return
                     }
                     
@@ -99,6 +106,39 @@ struct EmailEntryStep: View {
             .padding()
             .navigationBarBackButtonHidden(true)
         }
+    }
+    private func validateEmail() {
+        if !isValidEmail(viewModel.email) {
+            emailErrorMessage = "Please enter a valid email address."
+        } else {
+            emailErrorMessage = ""
+        }
+    }
+    private func isValidEmail(_ email: String) -> Bool {
+        let emailRegEx = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}"
+        let emailPredicate = NSPredicate(format:"SELF MATCHES %@", emailRegEx)
+        return emailPredicate.evaluate(with: email)
+    }
+    
+    private func validatePassword() {
+        if !isValidPassword(viewModel.password) {
+            passwordErrorMessage = "Password must be at least 6 characters long and include 1 uppercase letter, 1 lowercase letter, 1 number, and 1 special character."
+        } else {
+            passwordErrorMessage = ""
+        }
+    }
+    
+    private func validateConfirmPassword() {
+        if viewModel.password != viewModel.confirmPassword {
+            confirmPasswordErrorMessage = "Password and Confirm Password do not match."
+        } else {
+            confirmPasswordErrorMessage = ""
+        }
+    }
+    private func isValidPassword(_ password: String) -> Bool {
+        let passwordRegEx = "(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*]).{6,}"
+        let passwordPredicate = NSPredicate(format:"SELF MATCHES %@", passwordRegEx)
+        return passwordPredicate.evaluate(with: password)
     }
 }
 

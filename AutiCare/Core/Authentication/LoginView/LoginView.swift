@@ -78,7 +78,7 @@ struct LoginView: View {
                 
                 // Sign Up
                 NavigationLink {
-                    RegistrationFlow()
+                    RegistrationFlow(currentStep: .emailEntry)
                 } label: {
                     HStack(spacing: 3) {
                         Text("Don't have an Account?")
