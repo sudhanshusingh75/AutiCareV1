@@ -17,6 +17,8 @@ struct AddNewPostView: View {
     @StateObject private var profileVM = ProfileViewModel()
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject var authViewModel: AuthViewModel
+    @State private var isPosting = false
+
     
     var body: some View {
         NavigationStack{
@@ -138,16 +140,24 @@ struct AddNewPostView: View {
                     .padding(.horizontal)
                     Spacer()
                 }.toolbar {
+                    
                     ToolbarItem(placement: .topBarTrailing) {
-                        Button {
-                            Task {
-                                await viewModel.addPost(currentUser: authViewModel.currentUser)
-                                onPostAdded?()
-                                dismiss()
-                            }
-                        } label: {
-                            Text("Post")
-                        }.disabled(viewModel.postContent.trimmingCharacters(in: .whitespaces).isEmpty)
+                        if isPosting{
+                            ProgressView().progressViewStyle(CircularProgressViewStyle())
+                        }
+                        else{
+                            Button {
+                                isPosting = true
+                                Task {
+                                    await viewModel.addPost(currentUser: authViewModel.currentUser)
+                                    onPostAdded?()
+                                    isPosting = false
+                                    dismiss()
+                                }
+                            } label: {
+                                Text("Post")
+                            }.disabled(viewModel.postContent.trimmingCharacters(in: .whitespaces).isEmpty || isPosting)
+                        }
                     }
                 }
             }
