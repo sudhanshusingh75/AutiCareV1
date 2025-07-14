@@ -18,6 +18,7 @@ struct ProgressTab: View {
             .environmentObject(navManager)
             .navigationTitle("Progress")
             .navigationBarTitleDisplayMode(.inline)
+            
         }
 
     }

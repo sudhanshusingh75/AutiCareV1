@@ -81,14 +81,12 @@ struct OtherUserProfileView: View {
                                     Text(isFollowing ? "Following" : "Follow")
                                         .font(.subheadline)
                                         .fontWeight(.semibold)
-                                        .foregroundColor(isFollowing ? .black : .white)
-                                        .frame(width: 360, height: 32)
-                                        .background(isFollowing ? Color.white : Color.blue)
-                                        .overlay(
-                                            RoundedRectangle(cornerRadius: 6)
-                                                .stroke(isFollowing ? Color.gray : Color.clear, lineWidth: 1)
-                                        )
-                                        .clipShape(RoundedRectangle(cornerRadius: 6))
+                                        .padding()
+                                        .foregroundStyle(Color.init(red: 0, green: 0.387, blue: 0.5))
+                                        .frame(maxWidth: .infinity)
+                                        .background(Color(red:0,green: 0.387,blue: 0.5).opacity(0.1))
+                                        .cornerRadius(16)
+                                        .padding()
                                 }
                             }
                         }
