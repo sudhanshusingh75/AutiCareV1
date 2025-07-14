@@ -64,7 +64,7 @@ struct ReviewStep: View {
                         .padding(.vertical)
 
                     Button(action: {
-                        if let url = URL(string: "https://policy-pages-crafted.lovable.app") {
+                        if let url = URL(string: "https://sudhanshusingh75.github.io/auticare-web/terms-and-conditions/") {
                             UIApplication.shared.open(url)
                         }
                     }) {
