@@ -49,13 +49,12 @@ struct FeedView: View {
         }
         
         ScrollViewReader { proxy in
-            ScrollView {
+            ScrollView(showsIndicators: false) {
                 if viewModel.posts.isEmpty {
                     Text("No posts yet — be the first to share something amazing!")
                         .font(.callout)
-                        .multilineTextAlignment(.leading)
+                        .multilineTextAlignment(.center)
                         .foregroundColor(.gray)
-                        .padding()
                 } else {
                     ForEach(viewModel.posts, id: \.id) { post in
                         FeedCell(viewModel: viewModel, post: post, currentUserProfileImage: authViewModel.currentUser?.profileImageURL)

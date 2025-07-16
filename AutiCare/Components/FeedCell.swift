@@ -148,22 +148,28 @@ struct FeedCell: View {
                 }
                 .frame(maxWidth: .infinity,alignment: .leading)
                 .padding(.horizontal, 20)
-                VStack{
-                    //caption + Image Body
-                    TabView{
-                        ForEach(post.imageURL, id: \.self) { imageUrl in
-                            if let url = URL(string: imageUrl){
-                                WebImage(url: url)
-                                    .resizable()
-                                    .scaledToFill()
-                                    .frame(width: 375, height: 300)
-                                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                VStack {
+                    GeometryReader { geo in
+                        TabView {
+                            ForEach(post.imageURL, id: \.self) { imageUrl in
+                                if let url = URL(string: imageUrl) {
+                                    WebImage(url: url)
+                                        .resizable()
+                                        .scaledToFill()
+                                        .frame(width: geo.size.width - 32, height: 300)
+                                        .clipped()
+                                        .cornerRadius(16)
+                                        .padding(.horizontal, 16)
+                                        .background(Color.clear)
+                                }
                             }
                         }
+                        .tabViewStyle(PageTabViewStyle(indexDisplayMode: .automatic))
+                        .frame(width: geo.size.width, height: 300)
                     }
-                    .tabViewStyle(PageTabViewStyle(indexDisplayMode: .always))
                     .frame(height: 300)
                 }
+
             }
             else{
                 VStack{
