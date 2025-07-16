@@ -91,6 +91,9 @@ struct CommentSectionView: View {
         }
         .onAppear {
             viewModel.fetchComments()
+            Task{
+                await currentUserVm.fetchUser()
+            }
         }
     }
 }

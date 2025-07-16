@@ -26,9 +26,7 @@ struct MemoryMatchingDisplayView: View {
                     MemoryCardPreviewView(symbol: "star", isFaceUp: true)
                     MemoryCardPreviewView(symbol: "sun.max", isFaceUp: false)
                     MemoryCardPreviewView(symbol: "leaf", isFaceUp: true)
-                    
                 }
-
                 Text("Memory Match")
                     .font(.system(size: 28, weight: .bold))
                     .foregroundColor(Color(red: 0, green: 0.387, blue: 0.5))

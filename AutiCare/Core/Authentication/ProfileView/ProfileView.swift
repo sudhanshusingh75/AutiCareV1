@@ -10,7 +10,6 @@ struct ProfileView: View {
         .init(.flexible(), spacing: 1),
         .init(.flexible(), spacing: 1)
     ]
-    
     var body: some View {
         // Conditional rendering for user data
         NavigationStack {
@@ -85,12 +84,34 @@ struct ProfileView: View {
                                 .background(Color(red:0,green: 0.387,blue: 0.5).opacity(0.1))
                                 .cornerRadius(16)
                                 .padding()
-//                                .overlay(RoundedRectangle(cornerRadius: 6).stroke(Color.gray, lineWidth: 1))
+                            //                                .overlay(RoundedRectangle(cornerRadius: 6).stroke(Color.gray, lineWidth: 1))
                         }
                         Divider()
                     }
                     // Post Grid View
-                    LazyVGrid(columns: gridItems, spacing: 1) {
+                    if profileVM.myPosts.isEmpty {
+                        VStack(spacing: 12) {
+                            Image(systemName: "square.and.pencil")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 60, height: 60)
+                                .foregroundColor(Color(red: 0, green: 0.387, blue: 0.5).opacity(0.6))
+                            
+                            Text("Your story starts here!")
+                                .font(.headline)
+                                .foregroundColor(Color(red: 0, green: 0.387, blue: 0.5))
+                            
+                            Text("Share your experiences, tips, or questions with the community. Every voice matters!")
+                                .font(.footnote)
+                                .foregroundColor(.gray)
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal, 30)
+                        }
+                        .frame(maxWidth: .infinity, minHeight: 200)
+                        .padding(.top)
+                    }
+                    
+                    else{ LazyVGrid(columns: gridItems, spacing: 1) {
                         ForEach(profileVM.myPosts, id: \.id) { post in
                             if let imageURL = post.imageURL.first, let url = URL(string: imageURL) {
                                 NavigationLink(destination: FeedView(selectedPostId: post.id)){
@@ -123,26 +144,26 @@ struct ProfileView: View {
                                     .cornerRadius(8)
                             }
                         }
-                    }
+                    }}
                     
                     
                 }
                 .navigationTitle("Profile")
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
-//                    ToolbarItem{
-//                        NavigationLink {
-//                            AddNewPostView
-//                            {
-//                                if let userId = authVM.currentUser?.id{
-//                                    profileVM.fetchMyPosts(userId: userId)
-//                                }
-//                            }
-//                        } label: {
-//                            Image(systemName: "plus.app")
-//                                .foregroundStyle(Color.init(red: 0, green: 0.387, blue: 0.5))
-//                        }
-//                    }
+                    //                    ToolbarItem{
+                    //                        NavigationLink {
+                    //                            AddNewPostView
+                    //                            {
+                    //                                if let userId = authVM.currentUser?.id{
+                    //                                    profileVM.fetchMyPosts(userId: userId)
+                    //                                }
+                    //                            }
+                    //                        } label: {
+                    //                            Image(systemName: "plus.app")
+                    //                                .foregroundStyle(Color.init(red: 0, green: 0.387, blue: 0.5))
+                    //                        }
+                    //                    }
                     ToolbarItem {
                         NavigationLink {
                             SettingsView(profileVM: profileVM)
@@ -171,8 +192,8 @@ struct ProfileView: View {
 }
 
 // Preview
-#Preview {
-    ProfileView()
-}
+//#Preview {
+//    ProfileView().environmentObject(AuthViewModel())
+//}
 
 

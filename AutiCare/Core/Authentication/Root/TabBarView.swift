@@ -30,7 +30,7 @@ struct TabBarView: View {
                 ProfileView()
                     .tabItem {
                         Label("Profile", systemImage: "person.circle")
-                    }
+                }
             }
         }
         .tint(Color.init(red: 0, green: 0.387, blue: 0.5))
