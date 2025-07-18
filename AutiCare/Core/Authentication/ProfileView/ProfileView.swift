@@ -61,9 +61,9 @@ struct ProfileView: View {
                             
                             Text(user.userName)
                                 .font(.footnote)
-                            Text(user.bio ?? "")
-                                .font(.footnote)
-                                .foregroundStyle(Color.gray)
+//                            Text(user.bio ?? "")
+//                                .font(.footnote)
+//                                .foregroundStyle(Color.gray)
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.horizontal)

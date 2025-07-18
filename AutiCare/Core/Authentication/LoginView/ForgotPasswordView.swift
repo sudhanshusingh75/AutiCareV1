@@ -23,22 +23,13 @@ struct ForgotPasswordView: View {
     }
     var body: some View {
         NavigationStack{
-        VStack {
+            VStack(spacing:20) {
             InputView(text: $email, title: "Enter Your Registered Email", placeholder: "name@example.com", errorMessage: emailErrorMessage)
                 .textInputAutocapitalization(.never)
                 .onChange(of: email) {validateEmail()}
                 .padding(.horizontal)
             
-            Button {
-                dismiss()
-            } label: {
-                HStack{
-                    Text("Back to Login")
-                }
-                .font(.system(size: 14))
-                .foregroundStyle(Color(.systemGray))
-                .padding(.vertical)
-            }
+           
             ButtonView(title: "Reset") {
                 Task {
                     do{
@@ -55,6 +46,15 @@ struct ForgotPasswordView: View {
             }
             .disabled(!formIsValid)
             .opacity(formIsValid ? 1.0 : 0.5)
+            Button {
+                dismiss()
+            } label: {
+                HStack{
+                    Text("Back to Login")
+                }
+                .font(.system(size: 14))
+                .foregroundStyle(Color(.systemGray))
+            }
             .alert(isPresented: $showAlert) {
                 Alert(title: Text("Password Reset"), message: Text(alertMessage), dismissButton: .default(Text("OK"),action: {
                     if isMailSent{

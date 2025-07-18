@@ -29,7 +29,7 @@ struct myProfileView: View {
                                 .clipped()
                                 .overlay {
                                     Circle().stroke(.gray, lineWidth: 2)
-                                }
+                            }
                         }
                         
                         Text(user.fullName)

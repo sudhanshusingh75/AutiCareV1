@@ -16,84 +16,85 @@ struct LoginView: View {
     
     var body: some View {
         NavigationStack {
-            VStack {
-                // image
-                Image("Image0")
-                    .resizable()
-                    .scaledToFill()
-                    .frame(width: 100, height: 200)
-                    .padding(.top, 32)
-                    .foregroundStyle(Color.init(red: 0, green: 0.387, blue: 0.5))
-                
-                Text("AutiCare")
-                    .font(.system(size: 50))
-                    .fontWeight(.bold)
-                    .foregroundStyle(Color.init(red: 0, green: 0.387, blue: 0.5))
-                    .padding(.horizontal)
-                
-                VStack(spacing: 12) {
-                    // email
-                    InputView(text: $email, title: "Email Address", placeholder: "name@example.com", errorMessage: emailErrorMessage)
-                        .textInputAutocapitalization(.never)
-                        .onChange(of: email) {validateEmail()}
+            ScrollView(showsIndicators: false) {
+                VStack {
+                    // image
+                    Image("Image0")
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 100, height: 200)
+                        .padding(.top, 32)
+                        .foregroundStyle(Color.init(red: 0, green: 0.387, blue: 0.5))
                     
-                    // password
-                    InputView(text: $password, title: "Password", placeholder: "Enter Your Password", isSecureField: true, errorMessage: passwordErrorMessage)
-                }
-                .padding(.horizontal)
-                .padding(.top, 12)
-                
-                NavigationLink {
-                    ForgotPasswordView()
-                        .navigationBarBackButtonHidden(true)
-                } label: {
-                    HStack{
-                        Spacer()
-                        Text("Forgot Password?")
-                            .padding(.horizontal)
+                    Text("AutiCare")
+                        .font(.system(size: 50))
+                        .fontWeight(.bold)
+                        .foregroundStyle(Color.init(red: 0, green: 0.387, blue: 0.5))
+                        .padding(.horizontal)
+                    
+                    VStack(spacing: 12) {
+                        // email
+                        InputView(text: $email, title: "Email Address", placeholder: "name@example.com", errorMessage: emailErrorMessage)
+                            .textInputAutocapitalization(.never)
+                            .onChange(of: email) {validateEmail()}
+                        
+                        // password
+                        InputView(text: $password, title: "Password", placeholder: "Enter Your Password", isSecureField: true, errorMessage: passwordErrorMessage)
                     }
-                    .font(.system(size: 14))
-                    .foregroundStyle(Color(.systemGray))
-                }
-                
-                // sign In
-                ButtonView(title: "SIGN IN") {
-                    Task {
-                        try await viewModel.signIn(withEmail: email, password: password)
+                    .padding(.horizontal)
+                    .padding(.top, 12)
+                    
+                    NavigationLink {
+                        ForgotPasswordView()
+                            .navigationBarBackButtonHidden(true)
+                    } label: {
+                        HStack{
+                            Spacer()
+                            Text("Forgot Password?")
+                                .padding(.horizontal)
+                        }
+                        .font(.system(size: 14))
+                        .foregroundStyle(Color(.systemGray))
+                    }
+                    
+                    // sign In
+                    ButtonView(title: "SIGN IN") {
+                        Task {
+                            try await viewModel.signIn(withEmail: email, password: password)
+                            
+                        }
                         
                     }
-                    
-                }
-                .alert(isPresented: $viewModel.showAlert) {
-                    Alert(
-                        title: Text("Login Error"),
-                        message: Text(viewModel.alertMessage),
-                        dismissButton: .default(Text("OK"))
-                    )
-                }
-                .disabled(!formIsValid)
-                .opacity(formIsValid ? 1.0 : 0.5)
-                .padding(.top, 24)
-                .padding(.bottom, 8)
-                
-                // Sign Up
-                NavigationLink {
-                    RegistrationFlow(currentStep: .emailEntry)
-                } label: {
-                    HStack(spacing: 3) {
-                        Text("Don't have an Account?")
-                        Text("Sign Up")
+                    .alert(isPresented: $viewModel.showAlert) {
+                        Alert(
+                            title: Text("Login Error"),
+                            message: Text(viewModel.alertMessage),
+                            dismissButton: .default(Text("OK"))
+                        )
                     }
-                    .font(.system(size: 14))
-                    .foregroundStyle(Color(.systemGray))
+                    .disabled(!formIsValid)
+                    .opacity(formIsValid ? 1.0 : 0.5)
+                    .padding(.top, 24)
+                    .padding(.bottom, 8)
+                    
+                    // Sign Up
+                    NavigationLink {
+                        RegistrationFlow(currentStep: .emailEntry)
+                    } label: {
+                        HStack(spacing: 3) {
+                            Text("Don't have an Account?")
+                            Text("Sign Up")
+                        }
+                        .font(.system(size: 14))
+                        .foregroundStyle(Color(.systemGray))
+                    }
+                    
+                    Spacer()
                 }
-                
-                Spacer()
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(Color.white)
-            .onTapGesture {
-                hideKeyboard()
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .onTapGesture {
+                    hideKeyboard()
+                }
             }
         }
     }
@@ -126,6 +127,6 @@ extension LoginView: AuthenticationProtocol {
 }
 
 #Preview {
-    LoginView()
+    LoginView().environmentObject(AuthViewModel())
 }
 

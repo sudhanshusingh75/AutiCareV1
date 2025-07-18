@@ -33,10 +33,10 @@ struct InputView: View {
             if let errorMessage = errorMessage,!errorMessage.isEmpty {
                 Text(errorMessage)
                     .font(.footnote)
-                    .padding()
                     .foregroundStyle(.red)
                     .multilineTextAlignment(.leading)
-                
+                    .fixedSize(horizontal: false, vertical: true)
+                    .lineLimit(nil)
             }
         }
     }
