@@ -8,11 +8,33 @@
 import SwiftUI
 
 struct OtherUserSettingsView: View {
+    @ObservedObject var userManager: UserRelationshipManager
+    @Environment(\.dismiss) var dismiss
+    let userId: String
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        Form{
+            Section{
+                HStack{
+                    Button{
+                        Task{
+                            await userManager.blockUser(userId: userId)
+                            dismiss()
+                        }
+                    }label: {
+                        HStack(spacing: 20){
+                            Image(systemName: "hand.raised.fill")
+                                .foregroundStyle(Color.red)
+                            Text("Block User")
+                                .foregroundColor(.red)
+                        }
+                    }
+                }
+            }
+        }
+        .navigationTitle("Settings")
     }
 }
 
 #Preview {
-    OtherUserSettingsView()
+    OtherUserSettingsView(userManager: UserRelationshipManager(), userId: "123")
 }

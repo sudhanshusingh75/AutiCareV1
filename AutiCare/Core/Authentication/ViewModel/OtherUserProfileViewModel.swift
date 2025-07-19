@@ -6,6 +6,8 @@ class OtherUserProfileViewModel: ObservableObject {
     @Published var user: User?
     @Published var othersPosts: [Posts] = []
     @Published var isFollowing: Bool?  // Optional to detect change from nil → true/false
+    @Published var isBlockedByMe: Bool = false
+    @Published var hasBlockedMe: Bool = false
 
     private let db = Firestore.firestore()
     private var listener: ListenerRegistration?

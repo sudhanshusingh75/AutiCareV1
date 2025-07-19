@@ -38,7 +38,7 @@ struct ProfileView: View {
                                     .padding(.all, 5)
                                     .overlay {
                                         Circle().stroke(lineWidth: 2)
-                                    }
+                                }
                             }
                             Spacer()
                             HStack(spacing: 8) {
@@ -91,7 +91,7 @@ struct ProfileView: View {
                     // Post Grid View
                     if profileVM.myPosts.isEmpty {
                         VStack(spacing: 12) {
-                            Image(systemName: "square.and.pencil")
+                            Image(systemName: "photo.on.rectangle.angled")
                                 .resizable()
                                 .scaledToFit()
                                 .frame(width: 60, height: 60)

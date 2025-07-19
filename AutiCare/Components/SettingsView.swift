@@ -33,6 +33,18 @@ struct SettingsView: View {
                         EditProfileView(user: user)
                     }
                 }
+                
+                NavigationLink {
+                    BlockedUsersList()
+                } label: {
+                    HStack(spacing: 20) {
+                        Image(systemName: "person.fill.xmark")
+                            .foregroundStyle(Color(red: 0, green: 0.387, blue: 0.5))
+                        Text("Blocked Users")
+                            .foregroundStyle(Color(red: 0, green: 0.387, blue: 0.5))
+                        Spacer()
+                    }
+                }
             }
             Section{
                 HStack {
@@ -59,9 +71,9 @@ struct SettingsView: View {
                             Text("Delete Account")
                                 .foregroundColor(.red)
                         }
-
+                        
                     }
-
+                    
                 }
             }
         }

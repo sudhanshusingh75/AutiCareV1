@@ -53,54 +53,69 @@ class CommentViewModel: ObservableObject {
 //            }
 //    }
     
-    func fetchComments() {
-        db.collection("Comments")
-            .whereField("postId", isEqualTo: self.postId)
-            .order(by: "createdAt", descending: true)
-            .addSnapshotListener { [weak self] snapshot, error in
-                guard let self = self else { return }
-
-                if let error = error {
-                    print("❌ Error fetching comments: \(error.localizedDescription)")
-                    return
-                }
-
-                guard let snapshot = snapshot else {
-                    DispatchQueue.main.async { self.comments = [] }
-                    print("⚠️ No comments found.")
-                    return
-                }
-
-                let dispatchGroup = DispatchGroup()
-                var fetchedComments: [Comments] = []
-
-                for document in snapshot.documents {
-                    do {
-                        var comment = try document.data(as: Comments.self)
-                        dispatchGroup.enter()
-                        
-                        // Fetch user info
-                        self.db.collection("Users").document(comment.userId).getDocument { userDoc, error in
-                            if let user = try? userDoc?.data(as: User.self) {
-                                comment.user = user
-                            }
-                            fetchedComments.append(comment)
-                            dispatchGroup.leave()
-                        }
-                    } catch {
-                        print("❌ Error decoding comment: \(error.localizedDescription)")
-                    }
-                }
-
-                dispatchGroup.notify(queue: .main) {
-                    self.comments = fetchedComments.sorted { $0.createdAt > $1.createdAt }
-                    print("✅ Successfully fetched \(self.comments.count) comments.")
-                }
-            }
+    func fetchBlockedUserIDs(for userId: String) async -> [String] {
+        let snapshot = try? await db.collection("Users")
+            .document(userId)
+            .collection("blockedUsers")
+            .getDocuments()
+        
+        return snapshot?.documents.map { $0.documentID } ?? []
     }
 
-    
-    
+    func fetchComments() {
+        guard let currentUserId = Auth.auth().currentUser?.uid else { return }
+
+        Task {
+            let blockedUserIDs = await fetchBlockedUserIDs(for: currentUserId)
+
+            db.collection("Comments")
+                .whereField("postId", isEqualTo: self.postId)
+                .order(by: "createdAt", descending: true)
+                .addSnapshotListener { [weak self] snapshot, error in
+                    guard let self = self else { return }
+
+                    if let error = error {
+                        print("❌ Error fetching comments: \(error.localizedDescription)")
+                        return
+                    }
+
+                    guard let snapshot = snapshot else {
+                        DispatchQueue.main.async { self.comments = [] }
+                        return
+                    }
+
+                    let dispatchGroup = DispatchGroup()
+                    var fetchedComments: [Comments] = []
+
+                    for document in snapshot.documents {
+                        do {
+                            var comment = try document.data(as: Comments.self)
+
+                            // 🔒 Skip blocked users
+                            if blockedUserIDs.contains(comment.userId) {
+                                continue
+                            }
+
+                            dispatchGroup.enter()
+                            self.db.collection("Users").document(comment.userId).getDocument { userDoc, _ in
+                                if let user = try? userDoc?.data(as: User.self) {
+                                    comment.user = user
+                                }
+                                fetchedComments.append(comment)
+                                dispatchGroup.leave()
+                            }
+                        } catch {
+                            print("❌ Error decoding comment: \(error.localizedDescription)")
+                        }
+                    }
+
+                    dispatchGroup.notify(queue: .main) {
+                        self.comments = fetchedComments.sorted { $0.createdAt > $1.createdAt }
+                    }
+                }
+        }
+    }
+ 
     func addComment(content: String) {
         guard let userId = Auth.auth().currentUser?.uid else { return }
         

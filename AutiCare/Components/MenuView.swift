@@ -6,92 +6,18 @@ struct MenuView: View {
     @ObservedObject var profileViewModel: OtherUserProfileViewModel
     let post: Posts
     @Environment(\.dismiss) var dismiss
+    @StateObject private var userManagement = UserRelationshipManager()
+    @State private var showBlockAlert = false
+    @State private var selectedUserId: String?
+    @State private var showReportAlert = false
+
+
     
     private var currentUserId: String? {
         Auth.auth().currentUser?.uid
     }
     
     var body: some View {
-        //        VStack(alignment:.leading,spacing: 12) {
-        //
-        //            // Follow/Unfollow for Other Users
-        //            if post.userId != currentUserId {
-        //                Button {
-        //                    Task {
-        //                        await profileViewModel.toggleFollow(for: post.userId)
-        //                    }
-        //                } label: {
-        //                    let currentlyFollowing = profileViewModel.isFollowing ?? false
-        //
-        //                    HStack {
-        //                        Image(systemName: currentlyFollowing ? "person.fill.xmark" : "person.fill.checkmark")
-        //                        Text(currentlyFollowing ? "Unfollow" : "Follow")
-        //                    }
-        //                    .frame(maxWidth: .infinity)
-        //                    .padding()
-        //                    .background(currentlyFollowing ? Color.red.opacity(0.2) : Color.blue.opacity(0.2))
-        //                    .foregroundStyle(currentlyFollowing ? Color.red : Color.blue)
-        //                    .clipShape(RoundedRectangle(cornerRadius: 10))
-        //                }
-        //            }
-        //
-        //            // Delete Post (Only for Owner)
-        //            if post.userId == currentUserId {
-        //                Button {
-        //                    Task {
-        //                        await feedViewModel.deletePost(post: post)
-        //                    }
-        //                } label: {
-        //                    HStack {
-        //                        Image(systemName: "trash")
-        //                        Text("Delete Post")
-        //                    }
-        //                    .frame(maxWidth: .infinity)
-        //                    .padding()
-        //                    .background(Color.red.opacity(0.2))
-        //                    .foregroundStyle(Color.red)
-        //                    .clipShape(RoundedRectangle(cornerRadius: 10))
-        //                }
-        //            }
-        //
-        //            // Report Post (Only for Others)
-        //            if post.userId != currentUserId {
-        //                Divider()
-        //                Button {
-        //                    Task {
-        //                        try await feedViewModel.reportPost(postId: post.id)
-        //                        dismiss()
-        //                    }
-        //                } label: {
-        //                    HStack {
-        //                        Image(systemName: "exclamationmark.triangle.fill")
-        //                        Text("Report Post")
-        //                    }
-        //                    .frame(maxWidth: .infinity)
-        //                    .padding()
-        //                    .background(Color.orange.opacity(0.2))
-        //                    .foregroundStyle(Color.orange)
-        //                    .clipShape(RoundedRectangle(cornerRadius: 10))
-        //                }
-        //            }
-        //
-        //            Divider()
-        //
-        ////            Button {
-        ////                sharePost()
-        ////            } label: {
-        ////                Label("Share Post", systemImage: "square.and.arrow.up")
-        ////            }
-        ////            .frame(maxWidth: .infinity)
-        ////            .padding()
-        ////            .background(Color.green.opacity(0.2))
-        ////            .foregroundStyle(Color.green)
-        ////            .clipShape(RoundedRectangle(cornerRadius: 10))
-        //
-        //            Spacer()
-        //        }
-        //        .padding()
-        
         VStack(alignment: .leading, spacing: 12) {
             
             // Follow / Unfollow
@@ -131,12 +57,23 @@ struct MenuView: View {
                     bgColor: Color.orange.opacity(0.08),
                     fgColor: .orange
                 ) {
-                    Task {
-                        try await feedViewModel.reportPost(postId: post.id)
-                        dismiss()
-                    }
+                    showReportAlert = true
                 }
+                
+                .alert("Report this post?", isPresented: $showReportAlert) {
+                    Button("Report", role: .destructive) {
+                        Task {
+                            try await feedViewModel.reportPost(postId: post.id)
+                            dismiss()
+                        }
+                    }
+                    Button("Cancel", role: .cancel) {}
+                } message: {
+                    Text("Your report will be reviewed and actions will be taken within 24 hours.")
+                }
+
             }
+            
             // Block User (Only for Others)
             if post.userId != currentUserId {
                 menuButton(
@@ -145,13 +82,26 @@ struct MenuView: View {
                     bgColor: Color.red.opacity(0.15),
                     fgColor: Color.red
                 ) {
-                    // TODO: Add confirmation alert or direct logic
-                    print("Blocked user: \(post.userId)")
-                    // Optionally:
-                    // await feedViewModel.blockUser(userId: post.userId)
-                    dismiss()
+                    selectedUserId = post.userId
+                    showBlockAlert = true
                 }
+                .alert("Block this user?", isPresented: $showBlockAlert) {
+                    Button("Block", role: .destructive) {
+                        if let userId = selectedUserId {
+                            Task {
+                                await userManagement.blockUser(userId: userId)
+                                feedViewModel.fetchAllPosts()
+                                dismiss()
+                            }
+                        }
+                    }
+                    Button("Cancel", role: .cancel) {}
+                } message: {
+                    Text("They will be removed from your followers and followings. You won’t see each other’s posts anymore.")
+                }
+
             }
+            
 
             Spacer(minLength: 10)
         }

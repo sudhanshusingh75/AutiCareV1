@@ -27,6 +27,9 @@ class FeedViewModel: ObservableObject,Identifiable {
     init() {
         fetchAllPosts()
     }
+    
+    
+    
 
     func fetchAllPosts() {
         guard let userId = Auth.auth().currentUser?.uid else { return }
@@ -34,68 +37,23 @@ class FeedViewModel: ObservableObject,Identifiable {
         isLoading = true
         let db = Firestore.firestore()
 
-        // Step 1: Fetch hidden post IDs for current user
+        // Step 1: Fetch hidden posts
         db.collection("Users").document(userId).collection("hiddenPosts").getDocuments { hiddenSnapshot, error in
             let hiddenPostIds = hiddenSnapshot?.documents.map { $0.documentID } ?? []
 
-            // Step 2: Listen to Posts collection
-            db.collection("Posts").order(by: "createdAt", descending: true).addSnapshotListener { snapshot, error in
-                if let error = error {
-                    print("❌ Error listening for updates: \(error.localizedDescription)")
-                    return
-                }
+            // Step 2: Fetch blocked users
+            db.collection("Users").document(userId).collection("blockedUsers").getDocuments { blockedSnapshot, error in
+                let blockedUserIds = blockedSnapshot?.documents.map { $0.documentID } ?? []
 
-                guard let snapshot = snapshot else {
-                    print("❌ Error fetching posts: \(error!.localizedDescription)")
-                    return
-                }
-
-                let dispatchGroup = DispatchGroup()
-                var fetchedPosts: [Posts] = []
-
-                for document in snapshot.documents {
-                    if var post = try? document.data(as: Posts.self),
-                       !hiddenPostIds.contains(post.id) { // Skip hidden posts
-                        dispatchGroup.enter()
-                        let userRef = db.collection("Users").document(post.userId)
-                        userRef.getDocument { userDoc, error in
-                            if let userData = try? userDoc?.data(as: User.self) {
-                                post.user = userData
-                            }
-                            fetchedPosts.append(post)
-                            dispatchGroup.leave()
-                        }
-                    }
-                }
-
-                dispatchGroup.notify(queue: .main) {
-                    self.posts = fetchedPosts.sorted(by: { $0.createdAt > $1.createdAt })
-                    self.isLoading = false
-                }
-            }
-        }
-    }
-    func fetchPosts(forTag tag: String) {
-        guard let userId = Auth.auth().currentUser?.uid else { return }
-
-        isLoading = true
-
-        // Step 1: Fetch hidden post IDs
-        db.collection("Users").document(userId).collection("hiddenPosts").getDocuments { hiddenSnapshot, error in
-            let hiddenPostIds = hiddenSnapshot?.documents.map { $0.documentID } ?? []
-
-            // Step 2: Fetch tag-specific posts
-            self.db.collection("Posts")
-                .whereField("tag", arrayContains: tag)
-                .order(by: "createdAt", descending: true)
-                .addSnapshotListener { snapshot, error in
+                // Step 3: Listen to all posts
+                db.collection("Posts").order(by: "createdAt", descending: true).addSnapshotListener { snapshot, error in
                     if let error = error {
-                        print("❌ Error listening for tag posts: \(error.localizedDescription)")
+                        print("❌ Error listening for updates: \(error.localizedDescription)")
                         return
                     }
 
                     guard let snapshot = snapshot else {
-                        print("❌ Error fetching tag posts: \(error!.localizedDescription)")
+                        print("❌ Error fetching posts: \(error?.localizedDescription ?? "Unknown error")")
                         return
                     }
 
@@ -104,9 +62,11 @@ class FeedViewModel: ObservableObject,Identifiable {
 
                     for document in snapshot.documents {
                         if var post = try? document.data(as: Posts.self),
-                           !hiddenPostIds.contains(post.id) { // 🚫 Skip hidden posts
+                           !hiddenPostIds.contains(post.id),
+                           !blockedUserIds.contains(post.userId) {
+
                             dispatchGroup.enter()
-                            let userRef = self.db.collection("Users").document(post.userId)
+                            let userRef = db.collection("Users").document(post.userId)
                             userRef.getDocument { userDoc, error in
                                 if let userData = try? userDoc?.data(as: User.self) {
                                     post.user = userData
@@ -122,8 +82,67 @@ class FeedViewModel: ObservableObject,Identifiable {
                         self.isLoading = false
                     }
                 }
+            }
         }
     }
+
+    func fetchPosts(forTag tag: String) {
+        guard let userId = Auth.auth().currentUser?.uid else { return }
+
+        isLoading = true
+
+        // Step 1: Fetch hidden post IDs
+        db.collection("Users").document(userId).collection("hiddenPosts").getDocuments { hiddenSnapshot, error in
+            let hiddenPostIds = hiddenSnapshot?.documents.map { $0.documentID } ?? []
+
+            // Step 2: Fetch blocked user IDs
+            self.db.collection("Users").document(userId).collection("blockedUsers").getDocuments { blockedSnapshot, error in
+                let blockedUserIds = blockedSnapshot?.documents.map { $0.documentID } ?? []
+
+                // Step 3: Fetch tag-specific posts
+                self.db.collection("Posts")
+                    .whereField("tag", arrayContains: tag)
+                    .order(by: "createdAt", descending: true)
+                    .addSnapshotListener { snapshot, error in
+                        if let error = error {
+                            print("❌ Error listening for tag posts: \(error.localizedDescription)")
+                            return
+                        }
+
+                        guard let snapshot = snapshot else {
+                            print("❌ Error fetching tag posts: \(error?.localizedDescription ?? "Unknown error")")
+                            return
+                        }
+
+                        let dispatchGroup = DispatchGroup()
+                        var fetchedPosts: [Posts] = []
+
+                        for document in snapshot.documents {
+                            if var post = try? document.data(as: Posts.self),
+                               !hiddenPostIds.contains(post.id),
+                               !blockedUserIds.contains(post.userId) {
+
+                                dispatchGroup.enter()
+                                let userRef = self.db.collection("Users").document(post.userId)
+                                userRef.getDocument { userDoc, error in
+                                    if let userData = try? userDoc?.data(as: User.self) {
+                                        post.user = userData
+                                    }
+                                    fetchedPosts.append(post)
+                                    dispatchGroup.leave()
+                                }
+                            }
+                        }
+
+                        dispatchGroup.notify(queue: .main) {
+                            self.posts = fetchedPosts.sorted(by: { $0.createdAt > $1.createdAt })
+                            self.isLoading = false
+                        }
+                    }
+            }
+        }
+    }
+
 
     func toggleLike(for post: Posts) {
         guard let index = posts.firstIndex(where: { $0.id == post.id }) else { return }
