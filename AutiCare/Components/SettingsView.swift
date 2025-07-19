@@ -49,7 +49,6 @@ struct SettingsView: View {
                         }
                     }
                 }
-                
                 HStack {
                     NavigationLink {
                         DeleteAccountView()

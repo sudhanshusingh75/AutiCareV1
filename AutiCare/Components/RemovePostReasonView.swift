@@ -11,8 +11,10 @@ struct RemovePostReasonView: View {
     @Environment(\.dismiss) var dismiss
     @State private var selectedReason: String? = nil
     @State private var customReason: String = ""
-    
+
     let onSubmit: (String) -> Void
+
+    let themeColor = Color(red: 0, green: 0.387, blue: 0.5)
 
     let predefinedReasons = [
         "Not relevant to me",
@@ -30,59 +32,78 @@ struct RemovePostReasonView: View {
 
     var body: some View {
         NavigationView {
-            VStack(alignment: .leading, spacing: 16) {
-                Text("Why do you want to remove this post?")
-                    .font(.headline)
-                    .padding(.bottom, 5)
+            ScrollView {
+                VStack(alignment: .leading, spacing: 20) {
 
-                // Predefined options
-                ForEach(predefinedReasons + ["Other"], id: \.self) { reason in
-                    HStack {
-                        Image(systemName: selectedReason == reason ? "largecircle.fill.circle" : "circle")
-                            .foregroundColor(.blue)
-                        Text(reason)
-                        Spacer()
+                    Text("Why do you want to remove this post?")
+                        .font(.title2.bold())
+                        .padding(.bottom, 10)
+
+                    VStack(spacing: 12) {
+                        ForEach(predefinedReasons + ["Other"], id: \.self) { reason in
+                            HStack(alignment: .top) {
+                                Image(systemName: selectedReason == reason ? "largecircle.fill.circle" : "circle")
+                                    .foregroundColor(themeColor)
+                                    .font(.system(size: 20))
+                                    .padding(.top, 2)
+
+                                Text(reason)
+                                    .font(.body)
+                                    .foregroundColor(.primary)
+
+                                Spacer()
+                            }
+                            .padding(.vertical, 8)
+                            .padding(.horizontal)
+                            .background(Color(.systemGray6))
+                            .cornerRadius(10)
+                            .onTapGesture {
+                                selectedReason = reason
+                            }
+                        }
                     }
-                    .padding(.vertical, 4)
-                    .onTapGesture {
-                        selectedReason = reason
+
+                    if selectedReason == "Other" {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Your reason")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+
+                            TextEditor(text: $customReason)
+                                .frame(height: 100)
+                                .padding(8)
+                                .background(Color(.systemGray6))
+                                .cornerRadius(10)
+                        }
                     }
-                }
 
-                // Custom reason field
-                if selectedReason == "Other" {
-                    TextEditor(text: $customReason)
-                        .frame(height: 100)
-                        .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.gray.opacity(0.5)))
-                        .padding(.top, 8)
+                    Button(action: {
+                        onSubmit(finalReason)
+                        dismiss()
+                    }) {
+                        Text("Remove Post")
+                            .font(.headline)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(finalReason.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? Color.gray.opacity(0.4) : .red)
+                            .foregroundColor(.white)
+                            .cornerRadius(12)
+                    }
+                    .disabled(finalReason.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                    .padding(.top, 20)
                 }
-
-                Spacer()
-
-                // Submit Button
-                Button(action: {
-                    onSubmit(finalReason)
-                    dismiss()
-                }) {
-                    Text("Remove Post")
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(finalReason.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? Color.gray : Color.red)
-                        .foregroundColor(.white)
-                        .cornerRadius(8)
-                }
-                .disabled(finalReason.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                .padding(.top)
+                .padding()
             }
-            .padding()
             .navigationTitle("Remove Post")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
+                ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Cancel") {
                         dismiss()
                     }
+                  }
                 }
             }
         }
     }
-}
+
