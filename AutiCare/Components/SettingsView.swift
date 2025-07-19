@@ -45,6 +45,19 @@ struct SettingsView: View {
                         Spacer()
                     }
                 }
+                Button{
+                    if let url = URL(string: "https://sudhanshusingh75.github.io/auticare-web") {
+                        UIApplication.shared.open(url)
+                    }
+                }label: {
+                    HStack(spacing:20){
+                        Image(systemName: "info.circle.fill")
+                            .foregroundStyle(Color(red: 0, green: 0.387, blue: 0.5))
+                        Text("About Us")
+                            .foregroundStyle(Color(red: 0, green: 0.387, blue: 0.5))
+                        Spacer()
+                    }
+                }
             }
             Section{
                 HStack {
